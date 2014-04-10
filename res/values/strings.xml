@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">MyMusic</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_play_ctrl">Play Control</string>
+    <string name="action_search">Search</string>
+    <string name="btnSelect">Select</string>
+    <string name="btnPlayCtrl">Play</string>
+    <string name="btnStopCtrl">Stop</string>
+    <string name="pbSpeed">spd</string>
+    <string name="pbVolume">vol</string>
+    <string name="tempHaedName">tempHeadName</string>  
+
+</resources>

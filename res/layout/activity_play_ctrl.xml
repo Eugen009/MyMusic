@@ -1,0 +1,102 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".PlayCtrl" >
+    
+    <ListView
+        android:id="@+id/lstMusicList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/curMusicName" >
+    </ListView>
+
+    <Button
+        android:id="@+id/PlayBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textView2"
+        android:layout_alignLeft="@+id/volBar"
+        android:onClick="onPlayBtnClicked"
+        android:text="@string/btnPlayCtrl" />
+    
+    <Button
+        android:id="@+id/StopBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/PlayBtn"
+        android:layout_alignBottom="@+id/PlayBtn"
+        android:layout_toRightOf="@+id/PlayBtn"
+        android:text="@string/btnStopCtrl"
+        android:onClick = "onStopBtnClicked" />
+
+    <ProgressBar
+        android:id="@+id/progressBar1"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/PlayBtn"
+        android:layout_alignLeft="@+id/PlayBtn"
+        android:layout_alignRight="@+id/volBar"
+        android:layout_marginBottom="22dp" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/spdBar"
+        android:layout_alignLeft="@+id/spdBar"
+        android:text="@string/pbSpeed" />
+
+    <Button
+        android:id="@+id/selectedMusicBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/StopBtn"
+        android:layout_toRightOf="@+id/StopBtn"
+        android:text="@string/btnSelect"
+        android:onClick="onSelectMusicBtnClicked" />
+
+    <SeekBar
+        android:id="@+id/spdBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/volBar"
+        android:layout_alignParentBottom="true" />
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/volBar"
+        android:layout_alignRight="@+id/textView3"
+        android:text="@string/pbVolume" />
+    
+    <SeekBar
+        android:id="@+id/volBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textView3" />
+
+    <TextView
+        android:id="@+id/curMusicName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/progressBar1"
+        android:layout_alignLeft="@+id/progressBar1"
+        android:text="Large Text"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <Button
+        android:id="@+id/gotoUpPath"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textView2"
+        android:layout_toRightOf="@+id/selectedMusicBtn"
+        android:text="Up" 
+        android:onClick="onFileUpBtnClicked"/>
+
+</RelativeLayout>
