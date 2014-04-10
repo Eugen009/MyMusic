@@ -59,9 +59,13 @@ public class PlayCtrl extends Activity
 		this.m_curPath = settings.getString( ST_MUSIC_PATH, null );
 		this.m_curMusicName = settings.getString( ST_CUR_MUSIC_NAME, null );
 		
-		ProgressBar progressBar = (ProgressBar)this.findViewById( R.id.progressBar1);
-		if( progressBar != null)
+		SeekBar progressBar = (SeekBar)this.findViewById( R.id.progressBar1);
+		if( progressBar != null){
+//			progressBar
 			progressBar.setProgress( 0 );
+			progressBar.setOnSeekBarChangeListener( this );
+			m_ProgressBar = progressBar;
+		}
 		SeekBar speedBar = (SeekBar)this.findViewById(R.id.spdBar);
 		if( speedBar != null ){
 			speedBar.setProgress(50);
@@ -144,8 +148,8 @@ public class PlayCtrl extends Activity
 		Button btn = (Button)findViewById(R.id.PlayBtn);
 		if( btn != null ) 
 			btn.setText( "Play" );
-		m_Playing = false;
-		ProgressBar bar = (ProgressBar)findViewById(R.id.progressBar1);
+//		m_Playing = false;
+		SeekBar bar = (SeekBar)findViewById(R.id.progressBar1);
 		bar.setProgress(0);
 	}
 	
@@ -158,7 +162,6 @@ public class PlayCtrl extends Activity
 				m_Handler.sendMessage( new Message() );
 				curTime = SystemClock.uptimeMillis();
 			}
-//			sleep( 100 );
 		}
 	}
 	
@@ -199,6 +202,7 @@ public class PlayCtrl extends Activity
 		}
 		float curVol = (float)m_VolumeBar.getProgress() / 100.0f ;
 		m_Sound.setVolume( curVol, curVol );
+		m_Sound.setOnCompletionListener( this );
 		m_Sound.start();
 		Button btn = (Button)findViewById(R.id.PlayBtn);
     	if( btn != null ){
@@ -215,6 +219,12 @@ public class PlayCtrl extends Activity
 			m_Sound.release();
 			m_Sound = null;
 		}
+		Button btn = (Button)findViewById(R.id.PlayBtn);
+    	if( btn == null )
+    		return;
+		btn.setText( "Play" );
+		SeekBar bar = (SeekBar)findViewById(R.id.progressBar1);
+		bar.setProgress( 0 );
 	}
 	
     public void onPlayBtnClicked( View view ){
@@ -264,18 +274,24 @@ public class PlayCtrl extends Activity
 	@Override
 	public boolean handleMessage(Message msg) {
 		// updat the progress
-		if( m_Sound != null && m_Sound.isPlaying() ){
-	    	ProgressBar bar = (ProgressBar)findViewById(R.id.progressBar1);
-	    	float cur = (float)m_Sound.getCurrentPosition() / (float)m_Sound.getDuration();
-			cur *= 100.0f;
-			bar.setProgress( (int)cur );
-			return true;
+		if( m_bUpdateProgress ){
+			if( m_Sound != null && m_Sound.isPlaying() ){
+		    	SeekBar bar = (SeekBar)findViewById(R.id.progressBar1);
+		    	float cur = (float)m_Sound.getCurrentPosition() / (float)m_Sound.getDuration();
+				cur *= 100.0f;
+				bar.setProgress( (int)cur );
+				return true;
+			}else{
+				
+			}
 		}
 		return false;
 	}
 	
 	@Override
-	public void onProgressChanged(SeekBar seekBar, int progress, boolean arg2) {
+	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser ) {
+		if( !fromUser )
+			return;
 		if( this.findViewById(R.id.spdBar) == seekBar ){
 			if( m_Sound != null ){
 				
@@ -286,29 +302,35 @@ public class PlayCtrl extends Activity
 				cur /= 100.0f;
 				m_Sound.setVolume( cur, cur );
 			}
+		}else if( seekBar == m_ProgressBar ){
+			if( m_Sound != null ){
+				float cur = (float)progress;
+				cur *= 0.01f;
+				cur *= m_Sound.getDuration();
+				m_Sound.seekTo( (int)cur );
+				
+			}
 		}
 	}
 	
 	@Override
 	public void onCompletion(MediaPlayer player) {
 		this.stopMusic();
-		Button btn = (Button)findViewById(R.id.PlayBtn);
-    	if( btn == null || player != m_Sound )
-    		return;
-		btn.setText( "Play" );
-	}
 
-
-	@Override
-	public void onStartTrackingTouch(SeekBar arg0) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
-	public void onStopTrackingTouch(SeekBar arg0) {
-		// TODO Auto-generated method stub
-		
+	public void onStartTrackingTouch(SeekBar bar) {
+		if( bar == m_ProgressBar ){
+			m_bUpdateProgress = false;
+		}
+	}
+
+	@Override
+	public void onStopTrackingTouch(SeekBar bar) {
+		if( bar == m_ProgressBar ){
+			m_bUpdateProgress = true;
+		}
 	}
 	
 	@Override
@@ -392,7 +414,7 @@ public class PlayCtrl extends Activity
 	} 
 
 	protected MediaPlayer m_Sound;
-	protected boolean m_Playing = false;
+//	protected boolean m_Playing = false;
 	protected boolean m_bChanged = false;
 	protected boolean m_bFinished = true;
 	protected ProgressBar m_VolumeBar = null;
@@ -400,7 +422,9 @@ public class PlayCtrl extends Activity
 	protected String m_curPath;
 	protected String m_curMusicName;
 	protected Handler m_Handler = null;
+	protected boolean m_bUpdateProgress = true;
 	protected Thread m_UpdateThread = null;
+	protected SeekBar m_ProgressBar;
 
 
 
