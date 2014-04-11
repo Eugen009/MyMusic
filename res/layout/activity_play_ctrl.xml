@@ -7,21 +7,15 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".PlayCtrl" >
-    
-    <ListView
-        android:id="@+id/lstMusicList"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/curMusicName" >
-    </ListView>
 
     <Button
         android:id="@+id/PlayBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/textView2"
+        android:layout_above="@+id/volText"
         android:layout_alignLeft="@+id/volBar"
         android:onClick="onPlayBtnClicked"
+        style="?android:attr/buttonStyleSmall"
         android:text="@string/btnPlayCtrl" />
     
     <Button
@@ -32,6 +26,7 @@
         android:layout_alignBottom="@+id/PlayBtn"
         android:layout_toRightOf="@+id/PlayBtn"
         android:text="@string/btnStopCtrl"
+        style="?android:attr/buttonStyleSmall"
         android:onClick = "onStopBtnClicked" />
 
     <SeekBar
@@ -45,21 +40,12 @@
         android:layout_marginBottom="22dp" />
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/speedText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/spdBar"
         android:layout_alignLeft="@+id/spdBar"
         android:text="@string/pbSpeed" />
-
-    <Button
-        android:id="@+id/selectedMusicBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/StopBtn"
-        android:layout_toRightOf="@+id/StopBtn"
-        android:text="@string/btnSelect"
-        android:onClick="onSelectMusicBtnClicked" />
 
     <SeekBar
         android:id="@+id/spdBar"
@@ -68,18 +54,18 @@
         android:layout_alignLeft="@+id/volBar"
         android:layout_alignParentBottom="true" />
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/volText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/volBar"
-        android:layout_alignRight="@+id/textView3"
+        android:layout_alignRight="@+id/speedText"
         android:text="@string/pbVolume" />
     
     <SeekBar
         android:id="@+id/volBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/textView3" />
+        android:layout_above="@+id/speedText" />
 
     <TextView
         android:id="@+id/curMusicName"
@@ -87,16 +73,57 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/progressBar1"
         android:layout_alignLeft="@+id/progressBar1"
-        android:text="Large Text"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:text="@string/none_str"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+        android:id="@+id/curPath"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/lstMusicList"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/gotoUpPath"
+        android:text="@string/none_str" />
+
+    <ListView
+        android:id="@+id/lstMusicList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/curMusicName"
+        android:layout_alignLeft="@+id/curMusicName"
+        android:layout_below="@+id/gotoUpPath" >
+
+    </ListView>
 
     <Button
         android:id="@+id/gotoUpPath"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/textView2"
-        android:layout_toRightOf="@+id/selectedMusicBtn"
-        android:text="Up" 
-        android:onClick="onFileUpBtnClicked"/>
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/lstMusicList"
+        android:onClick="onFileUpBtnClicked"
+        android:text="@string/btnUpStr" />
+
+    <Button
+        android:id="@+id/preMusicBtn"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/progressBar1"
+        android:layout_toRightOf="@+id/StopBtn"
+        android:onClick="onPreBtnClicked"
+        android:text="@string/btnPreStr" />
+
+    <Button
+        android:id="@+id/nextMusicBtn"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/preMusicBtn"
+        android:layout_alignBottom="@+id/preMusicBtn"
+        android:layout_toRightOf="@+id/preMusicBtn"
+        android:onClick="onNextBtnClicked"
+        android:text="@string/btnNextStr" />
 
 </RelativeLayout>

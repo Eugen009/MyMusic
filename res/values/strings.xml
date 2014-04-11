@@ -11,6 +11,10 @@
     <string name="btnStopCtrl">Stop</string>
     <string name="pbSpeed">spd</string>
     <string name="pbVolume">vol</string>
-    <string name="tempHaedName">tempHeadName</string>  
+    <string name="tempHaedName">tempHeadName</string>
+    <string name="btnPreStr">Pre</string>
+    <string name="btnNextStr">Next</string>  
+    <string name="btnUpStr">Up</string>
+    <string name="none_str">None</string>
 
 </resources>

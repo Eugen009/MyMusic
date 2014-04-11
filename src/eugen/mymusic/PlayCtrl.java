@@ -7,7 +7,6 @@ import java.util.List;
 
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -33,8 +32,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 
-
-
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class PlayCtrl extends Activity 
 		implements 	OnSeekBarChangeListener, 
@@ -42,11 +39,6 @@ public class PlayCtrl extends Activity
 					MediaPlayer.OnCompletionListener,
 					Handler.Callback,
 					Runnable{
-	 
-	public static final String PREFS_NAME = "MyPrefsFile";
-	public static final String ST_VOLUME = "volume";
-	public static final String ST_MUSIC_PATH = "music_path";
-	public static final String ST_CUR_MUSIC_NAME = "cur_music_name";
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -54,10 +46,12 @@ public class PlayCtrl extends Activity
 		// Show the Up button in the action bar.
 		setupActionBar();
 		
-		SharedPreferences settings = getSharedPreferences( PREFS_NAME, 0 );
-		float curVolume = settings.getFloat( ST_VOLUME, 1.0f );
-		this.m_curPath = settings.getString( ST_MUSIC_PATH, null );
-		this.m_curMusicName = settings.getString( ST_CUR_MUSIC_NAME, null );
+		SharedPreferences settings = getSharedPreferences( EMusicData.PREFS_NAME, 0 );
+		float curVolume = settings.getFloat( EMusicData.ST_VOLUME, 1.0f );
+		this.m_curPath = settings.getString( EMusicData.ST_MUSIC_PATH, null );
+		this.m_curMusicName = settings.getString( EMusicData.ST_CUR_MUSIC_NAME, null );
+		this.mCurMusicIndex = settings.getInt( EMusicData.ST_CUR_MUSIC_INDEX, -1 );
+		
 		
 		SeekBar progressBar = (SeekBar)this.findViewById( R.id.progressBar1);
 		if( progressBar != null){
@@ -92,7 +86,6 @@ public class PlayCtrl extends Activity
 		}else{
 			curMusicName.setText( "Waiting for music...." );
 		}	
-//		m_Handler.sendEmptyMessageAtTime( 0, 100 );
 		m_Handler = new Handler( this );
 		this.m_UpdateThread = new Thread( this );
 		m_UpdateThread.start();
@@ -101,12 +94,14 @@ public class PlayCtrl extends Activity
 	@Override
 	protected void onStop(){
 		super.onStop();
-		SharedPreferences settings = getSharedPreferences( PREFS_NAME, 0 );
+		this.stopMusic();
+		SharedPreferences settings = getSharedPreferences( EMusicData.PREFS_NAME, 0 );
 		SharedPreferences.Editor editor = settings.edit();
 		float vol = (float)m_VolumeBar.getProgress() / 100.0f;
-		editor.putFloat( ST_VOLUME, vol );
-		editor.putString( ST_MUSIC_PATH, this.m_curPath );
-		editor.putString( ST_CUR_MUSIC_NAME, this.m_curMusicName );
+		editor.putFloat( EMusicData.ST_VOLUME, vol );
+		editor.putString( EMusicData.ST_MUSIC_PATH, this.m_curPath );
+		editor.putString( EMusicData.ST_CUR_MUSIC_NAME, this.m_curMusicName );
+		editor.putInt( EMusicData.ST_CUR_MUSIC_INDEX, this.mCurMusicIndex );
 		editor.commit();
 	} 
 
@@ -148,7 +143,6 @@ public class PlayCtrl extends Activity
 		Button btn = (Button)findViewById(R.id.PlayBtn);
 		if( btn != null ) 
 			btn.setText( "Play" );
-//		m_Playing = false;
 		SeekBar bar = (SeekBar)findViewById(R.id.progressBar1);
 		bar.setProgress(0);
 	}
@@ -208,6 +202,8 @@ public class PlayCtrl extends Activity
     	if( btn != null ){
     		btn.setText( "Pause" );
     	}
+		TextView curPathText = (TextView)this.findViewById(R.id.curMusicName);
+		curPathText.setText( m_curMusicName );
 		return true;
 	}
 	
@@ -301,6 +297,10 @@ public class PlayCtrl extends Activity
 				float cur = (float)progress;
 				cur /= 100.0f;
 				m_Sound.setVolume( cur, cur );
+				TextView volText = (TextView)findViewById( R.id.volText );
+				String volStr = "vol:";
+				volStr += progress;
+				volText.setText( volStr );
 			}
 		}else if( seekBar == m_ProgressBar ){
 			if( m_Sound != null ){
@@ -308,7 +308,10 @@ public class PlayCtrl extends Activity
 				cur *= 0.01f;
 				cur *= m_Sound.getDuration();
 				m_Sound.seekTo( (int)cur );
-				
+				TextView speedText = (TextView)findViewById( R.id.speedText );
+				String spdStr = "spd:";
+				spdStr += progress;
+				speedText.setText( spdStr );
 			}
 		}
 	}
@@ -344,13 +347,26 @@ public class PlayCtrl extends Activity
 					m_curPath += "/";
 					m_curPath += m_curMusicList.get(position);
 					this.showPathFile();
+					mCurMusicIndex = -1;
 				}else{
 					m_curMusicName = m_curMusicList.get( position );
+					this.mCurMusicIndex = position;
 //					m_curMusicName = m_curPath + "/" + m_curMusicList.get( position );
 					this.playMusic();
 				}
 			}
 		}	
+	}
+	
+	protected int playMusicAtList( int pos ){
+		File nextFile = new File( m_curPath, m_curMusicList.get(pos) );
+		if( !nextFile.isDirectory() ){
+			m_curMusicName = m_curMusicList.get( pos );
+			this.mCurMusicIndex = pos;
+			this.playMusic();
+			return pos;
+		}
+		return -1;
 	}
 	
 	public boolean isExternalStorageReadable(){
@@ -409,18 +425,50 @@ public class PlayCtrl extends Activity
 		msg = m_curPath;
 		msg += " : ";
 		msg += m_curMusicList.size();
-		TextView curMusicName = (TextView)this.findViewById(R.id.curMusicName);
-		curMusicName.setText( msg );
+		TextView curPathText = (TextView)this.findViewById(R.id.curPath);
+		curPathText.setText( msg );
 	} 
+	
+	public void onPreBtnClicked( View view ){
+		if( m_curPath == null || m_curPath.isEmpty() || m_curMusicList.isEmpty() || mCurMusicIndex < 0 ||
+			mCurMusicIndex >= m_curMusicList.size() )
+			return;
+		for( int i = mCurMusicIndex - 1; i >= 0; i -- ){
+			int res = this.playMusicAtList( i );
+			if( res != - 1 ){
+				mCurMusicIndex = res;
+				ListView listView = (ListView)this.findViewById( R.id.lstMusicList );
+				listView.setSelectionFromTop(res, 0);
+				return;
+			}
+		}
+		this.playMusic();
+	}
 
+	public void onNextBtnClicked( View view ){
+		if( m_curPath == null || m_curPath.isEmpty() || m_curMusicList.isEmpty() || mCurMusicIndex < 0 ||
+			mCurMusicIndex >= m_curMusicList.size() )
+			return;
+		for( int i = mCurMusicIndex + 1; i < m_curMusicList.size(); i ++ ){
+			int res = this.playMusicAtList( i );
+			if( res != - 1 ){
+				mCurMusicIndex = res;
+				ListView listView = (ListView)this.findViewById( R.id.lstMusicList );
+				listView.setSelectionFromTop(res, 0);
+				return;
+			}
+		}
+		this.playMusic();
+	}
+	
 	protected MediaPlayer m_Sound;
-//	protected boolean m_Playing = false;
 	protected boolean m_bChanged = false;
 	protected boolean m_bFinished = true;
 	protected ProgressBar m_VolumeBar = null;
-	protected List<String> m_curMusicList = null;// = {"test1", "test2"};
+	protected List<String> m_curMusicList = null;
 	protected String m_curPath;
 	protected String m_curMusicName;
+	protected int mCurMusicIndex = -1;
 	protected Handler m_Handler = null;
 	protected boolean m_bUpdateProgress = true;
 	protected Thread m_UpdateThread = null;
