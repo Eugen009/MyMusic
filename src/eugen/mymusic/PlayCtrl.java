@@ -31,6 +31,7 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
+import org.fmod.FMODAudioDevice;
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class PlayCtrl extends Activity 
@@ -45,6 +46,8 @@ public class PlayCtrl extends Activity
 		setContentView(R.layout.activity_play_ctrl);
 		// Show the Up button in the action bar.
 		setupActionBar();
+		
+		setStateStart();
 		
 		SharedPreferences settings = getSharedPreferences( EMusicData.PREFS_NAME, 0 );
 		float curVolume = settings.getFloat( EMusicData.ST_VOLUME, 1.0f );
@@ -86,7 +89,11 @@ public class PlayCtrl extends Activity
 		}else{
 			curMusicName.setText( "Waiting for music...." );
 		}	
+		
+		FMODAudioDevice.init( this );
+		
 		m_Handler = new Handler( this );
+		this.m_bUpdated = true;
 		this.m_UpdateThread = new Thread( this );
 		m_UpdateThread.start();
 	}
@@ -103,7 +110,21 @@ public class PlayCtrl extends Activity
 		editor.putString( EMusicData.ST_CUR_MUSIC_NAME, this.m_curMusicName );
 		editor.putInt( EMusicData.ST_CUR_MUSIC_INDEX, this.mCurMusicIndex );
 		editor.commit();
+		setStateStop();
 	} 
+	
+	protected void onDestroy(){
+		this.m_bUpdated = false;
+		try
+    	{
+			if( m_UpdateThread != null ){
+				m_UpdateThread.join();
+			}
+    	}
+    	catch (InterruptedException e) { }	
+		this.setStateDestroy();
+		FMODAudioDevice.close();
+	}
 
 	/**
 	 * Set up the {@link android.app.ActionBar}, if the API is available.
@@ -151,13 +172,50 @@ public class PlayCtrl extends Activity
 	public void run() {
 		// refresh ui
 		long curTime = SystemClock.uptimeMillis();
-		while( true ){
+		while( m_bUpdated ){
 			if( SystemClock.uptimeMillis() -curTime > 100 ){
 				m_Handler.sendMessage( new Message() );
 				curTime = SystemClock.uptimeMillis();
 			}
 		}
 	}
+	
+//	public boolean playMusicByAni( String filepath ){
+//		m_Sound = new MediaPlayer();
+//		m_Sound.setAudioStreamType(AudioManager.STREAM_MUSIC);
+//		try {
+//			m_Sound.setDataSource( filepath );
+//		}catch( IOException e ){
+//			e.printStackTrace();
+//			String msg = "Fail to load file:";
+//			msg += filepath;
+//			new AlertDialog.Builder(this) .setTitle("Warning") .setMessage(msg) .show();
+//			this.stopMusic();
+//			return false;
+//		}
+//		try {
+//			m_Sound.prepare();
+//		} catch (IllegalStateException e) {
+//			e.printStackTrace();
+//			String msg = "Fail to prepare the music:";
+//			msg += filepath;
+//			new AlertDialog.Builder(this) .setTitle("Warning") .setMessage(msg) .show();
+//			this.stopMusic();
+//			return false;
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//			String msg = "Fail to prepare the music:";
+//			msg += filepath;
+//			new AlertDialog.Builder(this) .setTitle("Warning") .setMessage(msg) .show();
+//			this.stopMusic();
+//			return false;
+//		}
+//		float curVol = (float)m_VolumeBar.getProgress() / 100.0f ;
+//		m_Sound.setVolume( curVol, curVol );
+//		m_Sound.setOnCompletionListener( this );
+//		m_Sound.start();
+//		return true;
+//	}
 	
 	public boolean playMusic(){
 		if( this.m_curPath == null || this.m_curPath.isEmpty() ||
@@ -166,38 +224,24 @@ public class PlayCtrl extends Activity
 		}
 		String filename = m_curPath + "/" + m_curMusicName;
 		this.stopMusic();
-		m_Sound = new MediaPlayer();
-		m_Sound.setAudioStreamType(AudioManager.STREAM_MUSIC);
-		try {
-			m_Sound.setDataSource( filename );
-		}catch( IOException e ){
-			e.printStackTrace();
-			String msg = "Fail to load file:";
-			msg += filename;
-			new AlertDialog.Builder(this) .setTitle("Warning") .setMessage(msg) .show();
-			this.stopMusic();
-			return false;
+		int soundId = this.playSound( filename );
+		switch( soundId ){
+			case -1:{
+				String msg = "The system is not initialized";
+				new AlertDialog.Builder(this) .setTitle("Warning") .setMessage(msg) .show();
+			}break;
+			case -2:{
+				String msg = "Fail to create the sound:";
+				msg += filename;
+				new AlertDialog.Builder(this) .setTitle("Warning") .setMessage(msg) .show();
+			}break;
+			case -3:{
+				String msg = "Fail to create channels ";
+				new AlertDialog.Builder(this) .setTitle("Warning") .setMessage(msg) .show();
+			}break;
 		}
-		try {
-			m_Sound.prepare();
-		} catch (IllegalStateException e) {
-			e.printStackTrace();
-			String msg = "Fail to prepare the music:";
-			msg += filename;
-			new AlertDialog.Builder(this) .setTitle("Warning") .setMessage(msg) .show();
-			this.stopMusic();
-			return false;
-		} catch (IOException e) {
-			e.printStackTrace();
-			String msg = "Fail to prepare the music:";
-			msg += filename;
-			new AlertDialog.Builder(this) .setTitle("Warning") .setMessage(msg) .show();
-			this.stopMusic();
-		}
-		float curVol = (float)m_VolumeBar.getProgress() / 100.0f ;
-		m_Sound.setVolume( curVol, curVol );
-		m_Sound.setOnCompletionListener( this );
-		m_Sound.start();
+		m_iCurSoundId = soundId;
+//		this.playMusicByAni(filename );
 		Button btn = (Button)findViewById(R.id.PlayBtn);
     	if( btn != null ){
     		btn.setText( "Pause" );
@@ -208,13 +252,15 @@ public class PlayCtrl extends Activity
 	}
 	
 	public void stopMusic(){
-		if( m_Sound != null ){
-			if( m_Sound.isPlaying() ){
-				m_Sound.stop();
-			}
-			m_Sound.release();
-			m_Sound = null;
-		}
+//		if( m_Sound != null ){
+//			if( m_Sound.isPlaying() ){
+//				m_Sound.stop();
+//			}
+//			m_Sound.release();
+//			m_Sound = null;
+//		}
+		this.stopSound( 0 );
+		m_iCurSoundId = -1;
 		Button btn = (Button)findViewById(R.id.PlayBtn);
     	if( btn == null )
     		return;
@@ -227,23 +273,29 @@ public class PlayCtrl extends Activity
 		Button btn = (Button)findViewById(R.id.PlayBtn);
     	if( btn == null )
     		return;
-    	if( m_Sound != null ){
-    		if( m_Sound.isPlaying() ){
-    			m_Sound.pause();
-    			btn.setText( "Play" );
-    		}else{ 
-    			m_Sound.start();
-    			btn.setText( "Pause" );
-    		}
-    	}else{
+    	if( m_iCurSoundId >= 0 ){
+    		boolean nextState = !this.isSoundPaused( m_iCurSoundId );
+    		this.pauseSound( m_iCurSoundId, nextState );
+    		btn.setText( nextState? "Play" : "Pause" );
+    	}else
     		this.playMusic();
-    	}
+//    	if( m_Sound != null ){
+//    		if( m_Sound.isPlaying() ){
+//    			m_Sound.pause();
+//    			
+//    		}else{ 
+//    			m_Sound.start();
+//    			btn.setText( "Pause" );
+//    		}
+//    	}else{
+//    		this.playMusic();
+//    	}
     }
     
     public void onStopBtnClicked( View view )
     {
-    	if( m_Sound == null )
-    		return;
+//    	if( m_Sound == null )
+//    		return;
     	this.stopMusic();
     	Button btn = (Button)findViewById( R.id.PlayBtn );
     	btn.setText( "Play" );
@@ -271,9 +323,18 @@ public class PlayCtrl extends Activity
 	public boolean handleMessage(Message msg) {
 		// updat the progress
 		if( m_bUpdateProgress ){
-			if( m_Sound != null && m_Sound.isPlaying() ){
+//			if( m_Sound != null && m_Sound.isPlaying() ){
+//		    	SeekBar bar = (SeekBar)findViewById(R.id.progressBar1);
+//		    	float cur = (float)m_Sound.getCurrentPosition() / (float)m_Sound.getDuration();
+//				cur *= 100.0f;
+//				bar.setProgress( (int)cur );
+//				return true;
+//			}else{
+//				
+//			}
+			if( m_iCurSoundId >=0 ){
 		    	SeekBar bar = (SeekBar)findViewById(R.id.progressBar1);
-		    	float cur = (float)m_Sound.getCurrentPosition() / (float)m_Sound.getDuration();
+		    	float cur = (float)getSoundPos(m_iCurSoundId) / (float)getSoundDur(m_iCurSoundId);
 				cur *= 100.0f;
 				bar.setProgress( (int)cur );
 				return true;
@@ -281,6 +342,7 @@ public class PlayCtrl extends Activity
 				
 			}
 		}
+		updateSoundSystem();
 		return false;
 	}
 	
@@ -289,30 +351,41 @@ public class PlayCtrl extends Activity
 		if( !fromUser )
 			return;
 		if( this.findViewById(R.id.spdBar) == seekBar ){
-			if( m_Sound != null ){
-				
-			}
-		}else if( this.findViewById(R.id.volBar) == seekBar ){
-			if( m_Sound != null ){
-				float cur = (float)progress;
-				cur /= 100.0f;
-				m_Sound.setVolume( cur, cur );
-				TextView volText = (TextView)findViewById( R.id.volText );
-				String volStr = "vol:";
-				volStr += progress;
-				volText.setText( volStr );
-			}
-		}else if( seekBar == m_ProgressBar ){
-			if( m_Sound != null ){
+//			if( m_Sound != null ){
+//				
+//			}
+			if( m_iCurSoundId >= 0 ){
 				float cur = (float)progress;
 				cur *= 0.01f;
-				cur *= m_Sound.getDuration();
-				m_Sound.seekTo( (int)cur );
-				TextView speedText = (TextView)findViewById( R.id.speedText );
-				String spdStr = "spd:";
-				spdStr += progress;
-				speedText.setText( spdStr );
+				cur += 0.5f;
+//				cur /= 100.0f;
+				this.setSoundSpd( m_iCurSoundId, cur ); 
 			}
+			TextView speedText = (TextView)findViewById( R.id.speedText );
+			String spdStr = "spd:";
+			spdStr += progress;
+			speedText.setText( spdStr );
+		}else if( this.findViewById(R.id.volBar) == seekBar ){
+			if( m_iCurSoundId >= 0 ){
+				float cur = (float)progress;
+				cur /= 100.0f;
+				this.setSoundVol( m_iCurSoundId, cur ); 
+//				m_Sound.setVolume( cur, cur );
+			}
+			TextView volText = (TextView)findViewById( R.id.volText );
+			String volStr = "vol:";
+			volStr += progress;
+			volText.setText( volStr );
+		}else if( seekBar == m_ProgressBar ){
+			if( m_iCurSoundId >= 0 ){
+				float cur = (float)progress;
+				cur *= 0.01f;
+				cur *= getSoundDur( m_iCurSoundId );
+				this.setSoundPos( m_iCurSoundId, (int)cur );
+//				m_Sound.seekTo( (int)cur );
+
+			}
+
 		}
 	}
 	
@@ -461,7 +534,39 @@ public class PlayCtrl extends Activity
 		this.playMusic();
 	}
 	
-	protected MediaPlayer m_Sound;
+	static {
+    	// Try debug libraries...
+    	try { System.loadLibrary("fmodD");
+    		  System.loadLibrary("fmodstudioD"); }
+    	catch (UnsatisfiedLinkError e) { }
+    	// Try logging libraries...
+    	try { System.loadLibrary("fmodL");
+    		  System.loadLibrary("fmodstudioL"); }
+    	catch (UnsatisfiedLinkError e) { }
+		// Try release libraries...
+		try { System.loadLibrary("fmod");
+		      System.loadLibrary("fmodstudio"); }
+		catch (UnsatisfiedLinkError e) { }
+		System.loadLibrary("stlport_shared");
+		System.loadLibrary("playCtrl");
+	}
+	
+	private native void setStateStart();
+	private native void setStateStop();
+	private native void setStateDestroy();
+	private native void main();
+	private native void updateSoundSystem();
+	private native int playSound( String filepath );
+	private native boolean stopSound( int id );
+	private native void pauseSound( int id, boolean flag );
+	private native boolean isSoundPaused( int id );
+	private native int getSoundPos( int id );
+	private native int getSoundDur( int id );
+	private native void setSoundPos( int id, int pos );
+	private native void setSoundVol( int id, float vol );
+	private native void setSoundSpd( int id, float spd );
+	
+//	protected MediaPlayer m_Sound;
 	protected boolean m_bChanged = false;
 	protected boolean m_bFinished = true;
 	protected ProgressBar m_VolumeBar = null;
@@ -472,8 +577,12 @@ public class PlayCtrl extends Activity
 	protected Handler m_Handler = null;
 	protected boolean m_bUpdateProgress = true;
 	protected Thread m_UpdateThread = null;
+	protected Thread m_FmodThread = null;
 	protected SeekBar m_ProgressBar;
+	protected boolean m_bUpdated = false;
+	protected int m_iCurSoundId = -1;
 
 
 
 }
+

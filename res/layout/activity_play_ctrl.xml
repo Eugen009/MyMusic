@@ -45,6 +45,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/spdBar"
         android:layout_alignLeft="@+id/spdBar"
+        android:layout_toLeftOf="@+id/StopBtn"
         android:text="@string/pbSpeed" />
 
     <SeekBar
@@ -53,12 +54,14 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/volBar"
         android:layout_alignParentBottom="true" />
+
     <TextView
         android:id="@+id/volText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/volBar"
-        android:layout_alignRight="@+id/speedText"
+        android:layout_alignLeft="@+id/PlayBtn"
+        android:layout_alignRight="@+id/PlayBtn"
         android:text="@string/pbVolume" />
     
     <SeekBar
