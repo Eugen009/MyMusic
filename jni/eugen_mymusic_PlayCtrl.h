@@ -169,6 +169,38 @@ JNIEXPORT void JNICALL Java_eugen_mymusic_PlayCtrl_setSoundVol
 JNIEXPORT void JNICALL Java_eugen_mymusic_PlayCtrl_setSoundSpd
   (JNIEnv *, jobject, jint, jfloat);
 
+/*
+ * Class:     eugen_mymusic_PlayCtrl
+ * Method:    setSoundLoopPoint
+ * Signature: (III)V
+ */
+JNIEXPORT void JNICALL Java_eugen_mymusic_PlayCtrl_setSoundLoopPoint
+  (JNIEnv *, jobject, jint, jint, jint);
+
+/*
+ * Class:     eugen_mymusic_PlayCtrl
+ * Method:    setSoundLoopCount
+ * Signature: (II)V
+ */
+JNIEXPORT void JNICALL Java_eugen_mymusic_PlayCtrl_setSoundLoopCount
+  (JNIEnv *, jobject, jint, jint);
+
+/*
+ * Class:     eugen_mymusic_PlayCtrl
+ * Method:    setSoundLooped
+ * Signature: (IZ)V
+ */
+JNIEXPORT void JNICALL Java_eugen_mymusic_PlayCtrl_setSoundLooped
+  (JNIEnv *, jobject, jint, jboolean);
+
+/*
+ * Class:     eugen_mymusic_PlayCtrl
+ * Method:    getSoundLooped
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_eugen_mymusic_PlayCtrl_getSoundLooped
+  (JNIEnv *, jobject, jint);
+
 #ifdef __cplusplus
 }
 #endif

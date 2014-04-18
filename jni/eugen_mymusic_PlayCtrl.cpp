@@ -24,6 +24,11 @@ void ERRCHECK( FMOD_RESULT res ){
 	}
 }
 
+FMOD_RESULT F_CALLBACK MyMusicCallback(FMOD_CHANNELCONTROL*,
+					FMOD_CHANNELCONTROL_TYPE,
+					FMOD_CHANNELCONTROL_CALLBACK_TYPE,
+					void *, void *);
+
 void InitFmodSystem(){
 	if( g_pSystem != 0 )
 		return;
@@ -106,7 +111,7 @@ jint Java_eugen_mymusic_PlayCtrl_playSound
 	LOG_DEBUG("Begin to play sound: %s", cFilePath.c_str() );
 
 	FMOD::Sound* sound = 0;
-	FMOD_RESULT result = g_pSystem ->createSound( cFilePath.c_str(), FMOD_CREATESTREAM, 0, &sound);
+	FMOD_RESULT result = g_pSystem ->createSound( cFilePath.c_str(), FMOD_SOFTWARE|FMOD_CREATESTREAM , 0, &sound);
     ERRCHECK(result);
     if( sound == 0 )
     	return -2;
@@ -118,6 +123,7 @@ jint Java_eugen_mymusic_PlayCtrl_playSound
     	LOG_DEBUG("Fail to create channel" );
     	return -3;
     }
+
     g_pCurChannel = channel;
     return 0;
 }
@@ -196,4 +202,65 @@ void Java_eugen_mymusic_PlayCtrl_setSoundSpd
 		return;
 	}
 	g_pCurChannel ->setPitch( spd );
+}
+
+void Java_eugen_mymusic_PlayCtrl_setSoundLoopPoint
+  (JNIEnv *env, jobject thiz, jint id, jint start, jint end){
+	if( !g_pSystem || !g_pSound ){
+		return;
+	}
+	if( g_pCurChannel == 0 ){
+		LOG_DEBUG( "Fail to set loop points" );
+	}else{
+		FMOD_RESULT res = g_pCurChannel ->setMode( FMOD_LOOP_NORMAL );
+		ERRCHECK( res );
+		g_pCurChannel ->setLoopCount( -1 );
+		g_pCurChannel ->setLoopPoints( start, FMOD_TIMEUNIT_MS, end, FMOD_TIMEUNIT_MS );
+		g_pCurChannel ->setPosition( (unsigned)start, FMOD_TIMEUNIT_MS );
+		g_pCurChannel ->setPaused( false );
+	}
+}
+
+void Java_eugen_mymusic_PlayCtrl_setSoundLoopCount
+  (JNIEnv *env, jobject thiz, jint id, jint count){
+	if(!g_pSystem || !g_pSound || !g_pCurChannel ){
+		return;
+	}
+	g_pCurChannel ->setLoopCount( count );
+}
+
+void Java_eugen_mymusic_PlayCtrl_setSoundLooped
+  (JNIEnv *env, jobject thiz, jint id, jboolean flag ){
+	if(!g_pSystem || !g_pSound || !g_pCurChannel ){
+		return;
+	}
+	g_pCurChannel ->setMode( flag? FMOD_LOOP_NORMAL: FMOD_LOOP_OFF );
+}
+
+jboolean Java_eugen_mymusic_PlayCtrl_getSoundLooped
+  (JNIEnv *, jobject, jint){
+	if(!g_pSystem || !g_pSound || !g_pCurChannel ){
+		return false;
+	}
+	FMOD_MODE mode;
+	g_pCurChannel ->getMode( &mode );
+	bool res = (mode&FMOD_LOOP_NORMAL)!=0;
+	return res;
+//	( flag? FMOD_LOOP_NORMAL: FMOD_LOOP_OFF );
+}
+
+void onSoundPlayToEnd( FMOD::Channel* channel ){
+
+}
+
+FMOD_RESULT F_CALLBACK MyMusicCallback(
+	FMOD_CHANNELCONTROL *chanControl,
+	FMOD_CHANNELCONTROL_TYPE controlType,
+	FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType,
+	void *commandData1, void *commandData2){
+	if( callbackType == FMOD_CHANNELCONTROL_CALLBACK_END ){
+		FMOD::Channel* channel = (FMOD::Channel*)chanControl;
+		onSoundPlayToEnd( channel );
+	}
+	return FMOD_OK;
 }

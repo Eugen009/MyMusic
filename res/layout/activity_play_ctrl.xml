@@ -129,4 +129,14 @@
         android:onClick="onNextBtnClicked"
         android:text="@string/btnNextStr" />
 
+    <Button
+        android:id="@+id/ABBtn"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/nextMusicBtn"
+        android:layout_toRightOf="@+id/nextMusicBtn"
+        android:onClick="onABBtnClicked"
+        android:text="A" />
+
 </RelativeLayout>

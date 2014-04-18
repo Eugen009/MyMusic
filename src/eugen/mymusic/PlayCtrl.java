@@ -1,7 +1,6 @@
 package eugen.mymusic;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +39,18 @@ public class PlayCtrl extends Activity
 					MediaPlayer.OnCompletionListener,
 					Handler.Callback,
 					Runnable{
+	
+	public enum ABState{
+		NONE, A, B, PLAY
+	};
+	
+	protected class ABInfo{
+
+		public int startTime = 0;
+		public int endTime = 0;
+		public ABState state = ABState.A;
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -100,7 +111,6 @@ public class PlayCtrl extends Activity
 	
 	@Override
 	protected void onStop(){
-		super.onStop();
 		this.stopMusic();
 		SharedPreferences settings = getSharedPreferences( EMusicData.PREFS_NAME, 0 );
 		SharedPreferences.Editor editor = settings.edit();
@@ -111,6 +121,7 @@ public class PlayCtrl extends Activity
 		editor.putInt( EMusicData.ST_CUR_MUSIC_INDEX, this.mCurMusicIndex );
 		editor.commit();
 		setStateStop();
+		super.onStop();
 	} 
 	
 	protected void onDestroy(){
@@ -124,6 +135,7 @@ public class PlayCtrl extends Activity
     	catch (InterruptedException e) { }	
 		this.setStateDestroy();
 		FMODAudioDevice.close();
+		super.onDestroy();
 	}
 
 	/**
@@ -180,43 +192,6 @@ public class PlayCtrl extends Activity
 		}
 	}
 	
-//	public boolean playMusicByAni( String filepath ){
-//		m_Sound = new MediaPlayer();
-//		m_Sound.setAudioStreamType(AudioManager.STREAM_MUSIC);
-//		try {
-//			m_Sound.setDataSource( filepath );
-//		}catch( IOException e ){
-//			e.printStackTrace();
-//			String msg = "Fail to load file:";
-//			msg += filepath;
-//			new AlertDialog.Builder(this) .setTitle("Warning") .setMessage(msg) .show();
-//			this.stopMusic();
-//			return false;
-//		}
-//		try {
-//			m_Sound.prepare();
-//		} catch (IllegalStateException e) {
-//			e.printStackTrace();
-//			String msg = "Fail to prepare the music:";
-//			msg += filepath;
-//			new AlertDialog.Builder(this) .setTitle("Warning") .setMessage(msg) .show();
-//			this.stopMusic();
-//			return false;
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//			String msg = "Fail to prepare the music:";
-//			msg += filepath;
-//			new AlertDialog.Builder(this) .setTitle("Warning") .setMessage(msg) .show();
-//			this.stopMusic();
-//			return false;
-//		}
-//		float curVol = (float)m_VolumeBar.getProgress() / 100.0f ;
-//		m_Sound.setVolume( curVol, curVol );
-//		m_Sound.setOnCompletionListener( this );
-//		m_Sound.start();
-//		return true;
-//	}
-	
 	public boolean playMusic(){
 		if( this.m_curPath == null || this.m_curPath.isEmpty() ||
 			this.m_curMusicName == null || this.m_curMusicName.isEmpty() ){
@@ -241,7 +216,6 @@ public class PlayCtrl extends Activity
 			}break;
 		}
 		m_iCurSoundId = soundId;
-//		this.playMusicByAni(filename );
 		Button btn = (Button)findViewById(R.id.PlayBtn);
     	if( btn != null ){
     		btn.setText( "Pause" );
@@ -252,13 +226,6 @@ public class PlayCtrl extends Activity
 	}
 	
 	public void stopMusic(){
-//		if( m_Sound != null ){
-//			if( m_Sound.isPlaying() ){
-//				m_Sound.stop();
-//			}
-//			m_Sound.release();
-//			m_Sound = null;
-//		}
 		this.stopSound( 0 );
 		m_iCurSoundId = -1;
 		Button btn = (Button)findViewById(R.id.PlayBtn);
@@ -279,23 +246,10 @@ public class PlayCtrl extends Activity
     		btn.setText( nextState? "Play" : "Pause" );
     	}else
     		this.playMusic();
-//    	if( m_Sound != null ){
-//    		if( m_Sound.isPlaying() ){
-//    			m_Sound.pause();
-//    			
-//    		}else{ 
-//    			m_Sound.start();
-//    			btn.setText( "Pause" );
-//    		}
-//    	}else{
-//    		this.playMusic();
-//    	}
     }
     
     public void onStopBtnClicked( View view )
     {
-//    	if( m_Sound == null )
-//    		return;
     	this.stopMusic();
     	Button btn = (Button)findViewById( R.id.PlayBtn );
     	btn.setText( "Play" );
@@ -323,27 +277,22 @@ public class PlayCtrl extends Activity
 	public boolean handleMessage(Message msg) {
 		// updat the progress
 		if( m_bUpdateProgress ){
-//			if( m_Sound != null && m_Sound.isPlaying() ){
-//		    	SeekBar bar = (SeekBar)findViewById(R.id.progressBar1);
-//		    	float cur = (float)m_Sound.getCurrentPosition() / (float)m_Sound.getDuration();
-//				cur *= 100.0f;
-//				bar.setProgress( (int)cur );
-//				return true;
-//			}else{
-//				
-//			}
 			if( m_iCurSoundId >=0 ){
 		    	SeekBar bar = (SeekBar)findViewById(R.id.progressBar1);
 		    	float cur = (float)getSoundPos(m_iCurSoundId) / (float)getSoundDur(m_iCurSoundId);
-				cur *= 100.0f;
-				bar.setProgress( (int)cur );
-				return true;
+				if( !getSoundLooped(m_iCurSoundId) && 1.0f - cur < 0.00001f ){
+					this.stopMusic();
+					cur = 0.0f;
+				}else{
+			    	cur *= 100.0f;
+					bar.setProgress( (int)cur );
+				}
 			}else{
 				
 			}
 		}
 		updateSoundSystem();
-		return false;
+		return true;
 	}
 	
 	@Override
@@ -351,14 +300,10 @@ public class PlayCtrl extends Activity
 		if( !fromUser )
 			return;
 		if( this.findViewById(R.id.spdBar) == seekBar ){
-//			if( m_Sound != null ){
-//				
-//			}
 			if( m_iCurSoundId >= 0 ){
 				float cur = (float)progress;
 				cur *= 0.01f;
 				cur += 0.5f;
-//				cur /= 100.0f;
 				this.setSoundSpd( m_iCurSoundId, cur ); 
 			}
 			TextView speedText = (TextView)findViewById( R.id.speedText );
@@ -370,7 +315,6 @@ public class PlayCtrl extends Activity
 				float cur = (float)progress;
 				cur /= 100.0f;
 				this.setSoundVol( m_iCurSoundId, cur ); 
-//				m_Sound.setVolume( cur, cur );
 			}
 			TextView volText = (TextView)findViewById( R.id.volText );
 			String volStr = "vol:";
@@ -382,8 +326,6 @@ public class PlayCtrl extends Activity
 				cur *= 0.01f;
 				cur *= getSoundDur( m_iCurSoundId );
 				this.setSoundPos( m_iCurSoundId, (int)cur );
-//				m_Sound.seekTo( (int)cur );
-
 			}
 
 		}
@@ -424,7 +366,6 @@ public class PlayCtrl extends Activity
 				}else{
 					m_curMusicName = m_curMusicList.get( position );
 					this.mCurMusicIndex = position;
-//					m_curMusicName = m_curPath + "/" + m_curMusicList.get( position );
 					this.playMusic();
 				}
 			}
@@ -484,19 +425,15 @@ public class PlayCtrl extends Activity
 					m_curMusicList.add( curFile.getName() );
 				}else if( curFile.isFile() ){
 					String filename = curFile.getName();
-					int dotIdx = filename.indexOf( '.' );
-					if( dotIdx > 1 ){
-						String ext = filename.substring( dotIdx, filename.length() );
-						if( !ext.isEmpty() && ext.compareToIgnoreCase(".mp3") == 0  ){
-							m_curMusicList.add( filename );
-						}
+					if( EMusicData.isMusicFileByExt( filename )){
+						m_curMusicList.add( filename );
 					}
 				}
 			}
 			this.m_curPath = path.getAbsolutePath();
 		}
 		msg = m_curPath;
-		msg += " : ";
+		msg += " : "; 
 		msg += m_curMusicList.size();
 		TextView curPathText = (TextView)this.findViewById(R.id.curPath);
 		curPathText.setText( msg );
@@ -534,6 +471,53 @@ public class PlayCtrl extends Activity
 		this.playMusic();
 	}
 	
+	public void onABBtnClicked( View view ){
+		if( this.m_iCurSoundId >= 0 ){
+			Button btn = (Button)this.findViewById( R.id.ABBtn );
+			if( btn != null ){
+				switch( mAbInfo.state ){
+				case A:
+					mAbInfo.state = ABState.B;
+					mAbInfo.startTime = this.getSoundPos( this.m_iCurSoundId );
+					break;
+				case B:
+					mAbInfo.state = ABState.PLAY;
+					mAbInfo.endTime = this.getSoundPos( this.m_iCurSoundId );
+					if( mAbInfo.endTime < mAbInfo.startTime ){
+						int tmp = mAbInfo.endTime;
+						mAbInfo.endTime = mAbInfo.startTime;
+						mAbInfo.startTime = tmp;
+					}else if( mAbInfo.endTime == mAbInfo.startTime ){
+						mAbInfo.state = ABState.A;
+					}
+					if( mAbInfo.state == ABState.PLAY ){
+						setSoundLooped( m_iCurSoundId, true );
+						setSoundLoopPoint( m_iCurSoundId, mAbInfo.startTime, mAbInfo.endTime );
+					}
+					break;
+				case PLAY:
+					mAbInfo.state = ABState.A;
+					setSoundLooped( m_iCurSoundId, false );
+					break;
+				default:
+					break;
+				}
+				switch( mAbInfo.state ){
+				case A:
+					btn.setText("A");
+					break;
+				case B:
+					btn.setText("B");
+					break;
+				case PLAY:
+					btn.setText("C");
+					break;
+				default: break;
+				}
+			}
+		}
+	}
+	
 	static {
     	// Try debug libraries...
     	try { System.loadLibrary("fmodD");
@@ -565,6 +549,10 @@ public class PlayCtrl extends Activity
 	private native void setSoundPos( int id, int pos );
 	private native void setSoundVol( int id, float vol );
 	private native void setSoundSpd( int id, float spd );
+	private native void setSoundLoopPoint( int id, int start, int end );
+	private native void setSoundLoopCount( int id, int count );
+	private native void setSoundLooped( int id, boolean flag );
+	private native boolean getSoundLooped( int id );
 	
 //	protected MediaPlayer m_Sound;
 	protected boolean m_bChanged = false;
@@ -581,8 +569,7 @@ public class PlayCtrl extends Activity
 	protected SeekBar m_ProgressBar;
 	protected boolean m_bUpdated = false;
 	protected int m_iCurSoundId = -1;
-
-
+	protected ABInfo mAbInfo = new ABInfo();
 
 }
 
