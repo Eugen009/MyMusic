@@ -13,7 +13,7 @@ public class EMusicData {
 	
 	public static boolean isMusicFileByExt( String filename ){
 //		String filename = curFile.getName();
-		int dotIdx = filename.indexOf( '.' );
+		int dotIdx = filename.lastIndexOf( '.' );
 		if( dotIdx > 1 ){
 			String ext = filename.substring( dotIdx, filename.length() );
 			if( !ext.isEmpty() ){

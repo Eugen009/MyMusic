@@ -45,7 +45,6 @@ public class PlayCtrl extends Activity
 	};
 	
 	protected class ABInfo{
-
 		public int startTime = 0;
 		public int endTime = 0;
 		public ABState state = ABState.A;
@@ -87,10 +86,9 @@ public class PlayCtrl extends Activity
 		}
 		//set the list view
 		ListView listView = (ListView)this.findViewById( R.id.lstMusicList );
+		mMusicList = listView;
 		showPathFile();
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, 
-		        R.layout.my_music_lst_item,  m_curMusicList );
-		listView.setAdapter( adapter );
+
 		listView.setOnItemClickListener( this );
 		// set the music
 		setVolumeControlStream( AudioManager.STREAM_MUSIC );
@@ -159,13 +157,6 @@ public class PlayCtrl extends Activity
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
-			// This ID represents the Home or Up button. In the case of this
-			// activity, the Up button is shown. Use NavUtils to allow users
-			// to navigate up one level in the application structure. For
-			// more details, see the Navigation pattern on Android Design:
-			//
-			// http://developer.android.com/design/patterns/navigation.html#up-vs-back
-			//
 			NavUtils.navigateUpFromSameTask(this);
 			return true;
 		}
@@ -353,7 +344,7 @@ public class PlayCtrl extends Activity
 	
 	@Override
 	public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-		if( parent == this.findViewById( R.id.lstMusicList ) ){
+		if( parent == mMusicList ){//this.findViewById( R.id.lstMusicList ) ){
 			TextView curMusicName = (TextView)findViewById( R.id.curMusicName );
 			if( curMusicName != null ){
 				curMusicName.setText( m_curMusicList.get(position) );
@@ -361,6 +352,7 @@ public class PlayCtrl extends Activity
 				if( nextFile.isDirectory() ){
 					m_curPath += "/";
 					m_curPath += m_curMusicList.get(position);
+					mMusicList.clearChoices();
 					this.showPathFile();
 					mCurMusicIndex = -1;
 				}else{
@@ -435,6 +427,11 @@ public class PlayCtrl extends Activity
 		msg = m_curPath;
 		msg += " : "; 
 		msg += m_curMusicList.size();
+		// refresh the list view
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, 
+		        R.layout.my_music_lst_item,  m_curMusicList );
+		mMusicList.setAdapter( adapter );
+		// refresh the show of current path
 		TextView curPathText = (TextView)this.findViewById(R.id.curPath);
 		curPathText.setText( msg );
 	} 
@@ -555,6 +552,8 @@ public class PlayCtrl extends Activity
 	private native boolean getSoundLooped( int id );
 	
 //	protected MediaPlayer m_Sound;
+	// view
+	protected ListView mMusicList = null;
 	protected boolean m_bChanged = false;
 	protected boolean m_bFinished = true;
 	protected ProgressBar m_VolumeBar = null;
