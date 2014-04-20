@@ -139,7 +139,7 @@ public class PlayCtrl extends Activity
 			}
     	}
     	catch (InterruptedException e) { }	
-
+		this.setStateDestroy();
 		FMODAudioDevice.close();
 		super.onDestroy();
 	}

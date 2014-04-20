@@ -51,6 +51,7 @@ void InitFmodSystem(){
 void DeInitFmodSystem(){
 	if( g_pSystem == 0 )
 		return;
+	g_pSystem ->mixerResume();
     FMOD_RESULT       result;
     if( !m_Sounds.empty() ){
 		for( size_t i = 0; i< m_Sounds.size(); i++ ){
@@ -67,7 +68,8 @@ void DeInitFmodSystem(){
     	g_pSound = 0;
     }
 
-
+    result = g_pSystem->close();
+    ERRCHECK(result);
     result = g_pSystem->release();
     ERRCHECK(result);
     g_pSystem = 0;
