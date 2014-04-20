@@ -21,11 +21,17 @@ public final class R {
         public static final int activity_vertical_margin=0x7f050001;
     }
     public static final class drawable {
-        public static final int ic_launcher=0x7f020000;
-        public static final int pause=0x7f020001;
-        public static final int play=0x7f020002;
-        public static final int search=0x7f020003;
-        public static final int stop=0x7f020004;
+        public static final int a=0x7f020000;
+        public static final int b=0x7f020001;
+        public static final int c=0x7f020002;
+        public static final int ic_launcher=0x7f020003;
+        public static final int next=0x7f020004;
+        public static final int pause=0x7f020005;
+        public static final int play=0x7f020006;
+        public static final int prev=0x7f020007;
+        public static final int search=0x7f020008;
+        public static final int stop=0x7f020009;
+        public static final int up=0x7f02000a;
     }
     public static final class id {
         public static final int ABBtn=0x7f09000f;
@@ -53,13 +59,15 @@ public final class R {
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
-        public static final int activity_play_ctrl=0x7f030001;
-        public static final int music_ctrl=0x7f030002;
-        public static final int my_music_lst_item=0x7f030003;
+        public static final int activity_music_list=0x7f030001;
+        public static final int activity_play_ctrl=0x7f030002;
+        public static final int music_ctrl=0x7f030003;
+        public static final int my_music_lst_item=0x7f030004;
     }
     public static final class menu {
         public static final int main=0x7f080000;
-        public static final int play_ctrl=0x7f080001;
+        public static final int music_list=0x7f080001;
+        public static final int play_ctrl=0x7f080002;
     }
     public static final class raw {
         public static final int raw=0x7f040000;
@@ -80,6 +88,7 @@ public final class R {
         public static final int pbSpeed=0x7f060008;
         public static final int pbVolume=0x7f060009;
         public static final int tempHaedName=0x7f06000a;
+        public static final int title_activity_music_list=0x7f06000f;
         public static final int title_activity_play_ctrl=0x7f060003;
     }
     public static final class style {

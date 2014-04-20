@@ -8,24 +8,25 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".PlayCtrl" >
 
-    <Button
+    <ImageButton
         android:id="@+id/PlayBtn"
+       	
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/volText"
         android:layout_alignLeft="@+id/volBar"
         android:onClick="onPlayBtnClicked"
         style="?android:attr/buttonStyleSmall"
-        android:text="@string/btnPlayCtrl" />
+        android:src="@drawable/play"/>
     
-    <Button
+    <ImageButton
         android:id="@+id/StopBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/PlayBtn"
         android:layout_alignBottom="@+id/PlayBtn"
         android:layout_toRightOf="@+id/PlayBtn"
-        android:text="@string/btnStopCtrl"
+        android:src="@drawable/stop"
         style="?android:attr/buttonStyleSmall"
         android:onClick = "onStopBtnClicked" />
 
@@ -99,16 +100,16 @@
 
     </ListView>
 
-    <Button
+    <ImageButton
         android:id="@+id/gotoUpPath"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignRight="@+id/lstMusicList"
         android:onClick="onFileUpBtnClicked"
-        android:text="@string/btnUpStr" />
+        android:src="@drawable/up" />
 
-    <Button
+    <ImageButton
         android:id="@+id/preMusicBtn"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
@@ -116,9 +117,9 @@
         android:layout_below="@+id/progressBar1"
         android:layout_toRightOf="@+id/StopBtn"
         android:onClick="onPreBtnClicked"
-        android:text="@string/btnPreStr" />
+        android:src = "@drawable/prev"/>
 
-    <Button
+    <ImageButton
         android:id="@+id/nextMusicBtn"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
@@ -127,9 +128,9 @@
         android:layout_alignBottom="@+id/preMusicBtn"
         android:layout_toRightOf="@+id/preMusicBtn"
         android:onClick="onNextBtnClicked"
-        android:text="@string/btnNextStr" />
+        android:src="@drawable/next" />
 
-    <Button
+    <ImageButton
         android:id="@+id/ABBtn"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
@@ -137,6 +138,6 @@
         android:layout_alignTop="@+id/nextMusicBtn"
         android:layout_toRightOf="@+id/nextMusicBtn"
         android:onClick="onABBtnClicked"
-        android:text="A" />
+        android:src = "@drawable/a"/>
 
 </RelativeLayout>

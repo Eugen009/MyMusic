@@ -7,37 +7,43 @@
     <uses-sdk
         android:minSdkVersion="11"
         android:targetSdkVersion="17" />
-        
-    <uses-permission 
-    	android:name="android.permission.READ_EXTERNAL_STORAGE" />
-        
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-        <receiver android:name =".RemoteControlReceiver" >
-           <intent-filter>
-            	<action android:name ="android.intent.action.MEDIA_BUTTON" />
+        <receiver android:name="eugen.mymusic.RemoteControlReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
         </receiver>
+
         <activity
             android:name="eugen.mymusic.PlayCtrl"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
-       <!-- <activity
+        <!--
+        <activity
             android:name="eugen.mymusic.PlayCtrl"
             android:label="@string/title_activity_play_ctrl"
             android:parentActivityName="eugen.mymusic.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="eugen.mymusic.MainActivity" />
-        </activity> -->
+        </activity>
+        -->
+        <activity
+            android:name="eugen.mymusic.MusicList"
+            android:label="@string/title_activity_music_list" >
+        </activity>
     </application>
 
 </manifest>

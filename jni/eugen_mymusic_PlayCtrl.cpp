@@ -48,18 +48,26 @@ void InitFmodSystem(){
     ERRCHECK(result);
 }
 
-void DeInitFmodSystem()
-{
+void DeInitFmodSystem(){
 	if( g_pSystem == 0 )
 		return;
     FMOD_RESULT       result;
-    for( size_t i = 0; i< m_Sounds.size(); i++ ){
-    	m_Sounds[i] ->release();
+    if( !m_Sounds.empty() ){
+		for( size_t i = 0; i< m_Sounds.size(); i++ ){
+			m_Sounds[i] ->release();
+		}
     }
     m_Sounds.clear();
+    if( g_pCurChannel != 0 ){
+    	g_pCurChannel ->stop();
+    	g_pCurChannel = 0;
+    }
+    if( g_pSound != 0 ){
+    	g_pSound ->release();
+    	g_pSound = 0;
+    }
 
-    result = g_pSystem->close();
-    ERRCHECK(result);
+
     result = g_pSystem->release();
     ERRCHECK(result);
     g_pSystem = 0;
@@ -71,7 +79,6 @@ void Java_eugen_mymusic_PlayCtrl_setStateStart
 	if( g_pSystem ){
 		g_pSystem ->mixerResume();
 	}
-	return;
 }
 
 void Java_eugen_mymusic_PlayCtrl_setStateStop

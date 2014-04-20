@@ -13,13 +13,15 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.app.Activity;
 import android.app.AlertDialog;
+//import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
+//import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
@@ -38,7 +40,7 @@ public class PlayCtrl extends Activity
 					OnItemClickListener,
 					MediaPlayer.OnCompletionListener,
 					Handler.Callback,
-					Runnable{
+					Runnable{ 
 	
 	public enum ABState{
 		NONE, A, B, PLAY
@@ -52,12 +54,12 @@ public class PlayCtrl extends Activity
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		EMusicData.log( "on create start" );
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_play_ctrl);
 		// Show the Up button in the action bar.
 		setupActionBar();
-		
-		setStateStart();
+
 		
 		SharedPreferences settings = getSharedPreferences( EMusicData.PREFS_NAME, 0 );
 		float curVolume = settings.getFloat( EMusicData.ST_VOLUME, 1.0f );
@@ -65,7 +67,7 @@ public class PlayCtrl extends Activity
 		this.m_curMusicName = settings.getString( EMusicData.ST_CUR_MUSIC_NAME, null );
 		this.mCurMusicIndex = settings.getInt( EMusicData.ST_CUR_MUSIC_INDEX, -1 );
 		
-		
+		mPlayBtn = (ImageButton)findViewById( R.id.PlayBtn );
 		SeekBar progressBar = (SeekBar)this.findViewById( R.id.progressBar1);
 		if( progressBar != null){
 //			progressBar
@@ -101,10 +103,14 @@ public class PlayCtrl extends Activity
 		
 		FMODAudioDevice.init( this );
 		
+		setStateStart();
+		
 		m_Handler = new Handler( this );
 		this.m_bUpdated = true;
 		this.m_UpdateThread = new Thread( this );
 		m_UpdateThread.start();
+		
+		EMusicData.log( "on create end" );
 	}
 	
 	@Override
@@ -122,8 +128,10 @@ public class PlayCtrl extends Activity
 		super.onStop();
 	} 
 	
+	@Override
 	protected void onDestroy(){
-		this.m_bUpdated = false;
+		EMusicData.log( "on destroy start" );
+		m_bUpdated = false;
 		try
     	{
 			if( m_UpdateThread != null ){
@@ -131,7 +139,7 @@ public class PlayCtrl extends Activity
 			}
     	}
     	catch (InterruptedException e) { }	
-		this.setStateDestroy();
+
 		FMODAudioDevice.close();
 		super.onDestroy();
 	}
@@ -164,9 +172,7 @@ public class PlayCtrl extends Activity
 	}
 	
 	public void OnMusicStopped(){
-		Button btn = (Button)findViewById(R.id.PlayBtn);
-		if( btn != null ) 
-			btn.setText( "Play" );
+		mPlayBtn.setImageResource( R.drawable.play );
 		SeekBar bar = (SeekBar)findViewById(R.id.progressBar1);
 		bar.setProgress(0);
 	}
@@ -174,12 +180,20 @@ public class PlayCtrl extends Activity
 	@Override
 	public void run() {
 		// refresh ui
-		long curTime = SystemClock.uptimeMillis();
+//		static long curTime = SystemClock.uptimeMillis();
+		
 		while( m_bUpdated ){
-			if( SystemClock.uptimeMillis() -curTime > 100 ){
+//			if( SystemClock.uptimeMillis() -curTime > 100 ){
 				m_Handler.sendMessage( new Message() );
-				curTime = SystemClock.uptimeMillis();
+//				curTime = SystemClock.uptimeMillis();
+//			}
+			try {
+				Thread.sleep( 100 );
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
+//			this.m_UpdateThread.sleep( 100 );
 		}
 	}
 	
@@ -207,10 +221,7 @@ public class PlayCtrl extends Activity
 			}break;
 		}
 		m_iCurSoundId = soundId;
-		Button btn = (Button)findViewById(R.id.PlayBtn);
-    	if( btn != null ){
-    		btn.setText( "Pause" );
-    	}
+		mPlayBtn.setImageResource( R.drawable.pause );
 		TextView curPathText = (TextView)this.findViewById(R.id.curMusicName);
 		curPathText.setText( m_curMusicName );
 		return true;
@@ -219,22 +230,17 @@ public class PlayCtrl extends Activity
 	public void stopMusic(){
 		this.stopSound( 0 );
 		m_iCurSoundId = -1;
-		Button btn = (Button)findViewById(R.id.PlayBtn);
-    	if( btn == null )
-    		return;
-		btn.setText( "Play" );
+		mPlayBtn.setImageResource( R.drawable.play );//( "Play" );
 		SeekBar bar = (SeekBar)findViewById(R.id.progressBar1);
 		bar.setProgress( 0 );
 	}
 	
     public void onPlayBtnClicked( View view ){
-		Button btn = (Button)findViewById(R.id.PlayBtn);
-    	if( btn == null )
-    		return;
     	if( m_iCurSoundId >= 0 ){
     		boolean nextState = !this.isSoundPaused( m_iCurSoundId );
     		this.pauseSound( m_iCurSoundId, nextState );
-    		btn.setText( nextState? "Play" : "Pause" );
+    		mPlayBtn.setImageResource( nextState? R.drawable.play: R.drawable.pause );
+//    		btn.setText( nextState? "Play" : "Pause" );
     	}else
     		this.playMusic();
     }
@@ -242,8 +248,7 @@ public class PlayCtrl extends Activity
     public void onStopBtnClicked( View view )
     {
     	this.stopMusic();
-    	Button btn = (Button)findViewById( R.id.PlayBtn );
-    	btn.setText( "Play" );
+    	mPlayBtn.setImageResource( R.drawable.play );
     }
     
     public void onSelectMusicBtnClicked( View view )
@@ -470,7 +475,7 @@ public class PlayCtrl extends Activity
 	
 	public void onABBtnClicked( View view ){
 		if( this.m_iCurSoundId >= 0 ){
-			Button btn = (Button)this.findViewById( R.id.ABBtn );
+			ImageButton btn = (ImageButton)this.findViewById( R.id.ABBtn );
 			if( btn != null ){
 				switch( mAbInfo.state ){
 				case A:
@@ -501,13 +506,13 @@ public class PlayCtrl extends Activity
 				}
 				switch( mAbInfo.state ){
 				case A:
-					btn.setText("A");
+					btn.setImageResource( R.drawable.a );
 					break;
 				case B:
-					btn.setText("B");
+					btn.setImageResource( R.drawable.b );
 					break;
 				case PLAY:
-					btn.setText("C");
+					btn.setImageResource( R.drawable.c );
 					break;
 				default: break;
 				}
@@ -554,9 +559,12 @@ public class PlayCtrl extends Activity
 //	protected MediaPlayer m_Sound;
 	// view
 	protected ListView mMusicList = null;
+	protected ProgressBar m_VolumeBar = null;
+	protected SeekBar m_ProgressBar = null;
+	protected ImageButton mPlayBtn = null;
+	// properties
 	protected boolean m_bChanged = false;
 	protected boolean m_bFinished = true;
-	protected ProgressBar m_VolumeBar = null;
 	protected List<String> m_curMusicList = null;
 	protected String m_curPath;
 	protected String m_curMusicName;
@@ -565,8 +573,7 @@ public class PlayCtrl extends Activity
 	protected boolean m_bUpdateProgress = true;
 	protected Thread m_UpdateThread = null;
 	protected Thread m_FmodThread = null;
-	protected SeekBar m_ProgressBar;
-	protected boolean m_bUpdated = false;
+	protected static boolean m_bUpdated = false;
 	protected int m_iCurSoundId = -1;
 	protected ABInfo mAbInfo = new ABInfo();
 

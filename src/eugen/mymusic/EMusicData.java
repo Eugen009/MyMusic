@@ -1,5 +1,7 @@
 package eugen.mymusic;
 
+import android.util.Log;
+
 public class EMusicData {
 	public String path;
 	public String name;
@@ -24,5 +26,9 @@ public class EMusicData {
 			}
 		}
 		return false;
+	}
+	
+	public static void log(String msg){
+		Log.d("MyLog", msg);
 	}
 }
