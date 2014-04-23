@@ -13,10 +13,7 @@ public class MyMusicServer
 	
 	public int onStartCommand( Intent intent, int flags, int startId ){
 		if( intent.getAction().equals(ACTION_PLAY) ){
-			m_Music = MediaPlayer.create( this, R.raw.test1 );
-			m_Music.setOnPreparedListener( this );
-			m_Music.setOnErrorListener(this);
-			m_Music.prepareAsync();
+
 		}
 		return 0;
 	}
