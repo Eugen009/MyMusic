@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.os.SystemClock;
 import android.app.Activity;
 import android.app.AlertDialog;
 //import android.util.Log;

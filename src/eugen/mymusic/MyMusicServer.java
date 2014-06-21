@@ -29,6 +29,7 @@ public class MyMusicServer
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
 	public boolean onError( MediaPlayer mp, int what, int extra ){
 		// do something
 		return true;

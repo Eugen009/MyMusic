@@ -17,5 +17,6 @@
     <string name="btnUpStr">Up</string>
     <string name="none_str">None</string>
     <string name="title_activity_music_list">MusicList</string>
+    <string name="title_activity_staff">Staff</string>
 
 </resources>
