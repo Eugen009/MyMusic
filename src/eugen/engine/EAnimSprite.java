@@ -1,6 +1,5 @@
 package eugen.engine;
 
-import eugen.mymusic.ESprite;
 
 public class EAnimSprite extends ESprite
 {

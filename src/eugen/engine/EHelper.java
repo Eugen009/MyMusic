@@ -1,4 +1,4 @@
-package eugen.mymusic;
+package eugen.engine;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;

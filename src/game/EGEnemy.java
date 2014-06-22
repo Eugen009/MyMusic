@@ -4,10 +4,10 @@ import java.util.Random;
 
 import eugen.engine.EEntity2D;
 import eugen.engine.EScreen;
+import eugen.engine.ESprite;
 import eugen.engine.ESpriteManager;
+import eugen.engine.EVector3;
 import eugen.engine.physics.ECollisionData;
-import eugen.mymusic.ESprite;
-import eugen.mymusic.EVector3;
 import eugen.mymusic.R;
 import android.content.Context;
 
@@ -17,6 +17,7 @@ public class EGEnemy extends EEntity2D{
 		mSprite.setTex( context.getResources(), R.drawable.plane );
 		ESpriteManager.getInstance().addSprite( mSprite );
 		this.setCollisionBitmask( EGMessageInfo.EnemyLayer );
+		this.incOrientation( .0f, .0f, 180.0f );
 //		this.setByRandomData();
 	}
 	

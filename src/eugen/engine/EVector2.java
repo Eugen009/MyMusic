@@ -1,4 +1,4 @@
-package eugen.mymusic;
+package eugen.engine;
 
 public class EVector2 {
 	public float x;

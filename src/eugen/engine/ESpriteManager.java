@@ -3,9 +3,6 @@ package eugen.engine;
 import java.util.ArrayList;
 import java.util.List;
 
-import eugen.mymusic.EBoundingBox;
-import eugen.mymusic.ESprite;
-import eugen.mymusic.EVector3;
 
 public class ESpriteManager {
 	protected static ESpriteManager gInstance = null;
@@ -46,9 +43,13 @@ public class ESpriteManager {
 			}
 		}
 	}
-	public void checkCollision(){
-		//ÔÝ¿¼ÂÇÐÔÄÜµÈ
-		
+	public void clear(){
+		int count = gSprites.size();
+		for( int i = 0; i< count; i++ ){
+			ESprite sprite = gSprites.get(i);
+			sprite.onRemove();
+		}
+		this.gSprites.clear();
 	}
 	
 }

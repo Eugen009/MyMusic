@@ -2,9 +2,12 @@ package eugen.mymusic;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import eugen.engine.ECamera;
 import eugen.engine.EInput;
+import eugen.engine.ESprite;
 import eugen.engine.ESpriteManager;
 import eugen.engine.ETouchCallbackData;
+import eugen.engine.EVector3;
 
 import android.content.Context;
 import android.opengl.EGLConfig;
@@ -24,6 +27,12 @@ public class MyGLSurfaceView extends GLSurfaceView{
 //		this.setRenderMode( GLSurfaceView.RENDERMODE_WHEN_DIRTY );
 		mRenderer = new MyGLRenderer( context );
 		setRenderer( mRenderer );
+	}
+	
+	public void onDestroy(){
+		if( mRenderer != null ){
+			mRenderer.clear();
+		}
 	}
 	
 	@Override

@@ -1,12 +1,13 @@
-package eugen.mymusic;
+package eugen.engine;
 
+import eugen.mymusic.MyGLRenderer;
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 
 public class EMeshRender implements EIRender{
 
-	EMeshRender( MyGLRenderer render ){
+	public EMeshRender( MyGLRenderer render ){
 //		this.mContext = context;
 		this.mRender = render;
 		mMVPMat = new EMatrix();
@@ -83,6 +84,8 @@ public class EMeshRender implements EIRender{
 		GLES20.glDisableVertexAttribArray( mPositionHandle );
 		GLES20.glDisableVertexAttribArray( mUVHandle );
 	}
+	
+	public void clear(){}
 	
 	protected float color[] = { 1.f, 1.f, 1.f, 1.0f };
 	

@@ -1,7 +1,8 @@
-package eugen.mymusic;
+package eugen.engine;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+
 
 public class EMesh {
 	

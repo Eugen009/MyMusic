@@ -21,6 +21,12 @@ public class EGSceneManager {
 		return scene;
 	}
 	
+	public void clear(){
+		if( this.mCurScene != null ){
+			mCurScene.clear();
+		}
+	}
+	
 	public EGScene getCurScene(){
 		return this.mCurScene;
 	}

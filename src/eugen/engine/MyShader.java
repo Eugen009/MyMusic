@@ -1,4 +1,4 @@
-package eugen.mymusic;
+package eugen.engine;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;

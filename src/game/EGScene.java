@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.content.Context;
 
 import eugen.engine.EEntity2D;
+import eugen.engine.ESpriteManager;
 import eugen.engine.ETimer;
 import eugen.engine.physics.ECollisionData;
 import eugen.engine.physics.EPPhysicsWorld;
@@ -114,6 +115,11 @@ public class EGScene {
 				}
 			}
 		}
+	}
+	
+	public void clear(){
+		this.mEntities.clear();
+		ESpriteManager.getInstance().clear();
 	}
 	
 //	protected EGPlayer mPlayers;

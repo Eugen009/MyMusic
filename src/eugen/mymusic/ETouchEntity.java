@@ -1,5 +1,7 @@
 package eugen.mymusic;
 
+import eugen.engine.EEntity;
+import eugen.engine.EMeshBuilder;
 import android.content.res.Resources;
 
 public class ETouchEntity extends EEntity{

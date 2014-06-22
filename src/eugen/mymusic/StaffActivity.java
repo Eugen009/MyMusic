@@ -16,34 +16,14 @@ public class StaffActivity extends Activity implements Runnable{
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-//		setContentView(R.layout.activity_staff);
 		mGLView = new MyGLSurfaceView(this);
 		setContentView( mGLView );
 		
-		// test
-		
-//		mTest = new ETouchEntity("touch", this.getResources() );
-//		mTest = null;
-//		mTestSprite = new EGPlayer();//new EFullSprite();//ESpriteManager.getInstance().createSprite();
-//		mTestSprite.setUVInfo( 1, 4 );
-//		mTestSprite.setTex( this.getResources(), 
-//				R.drawable.eight );
-//				R.drawable.star );
-//		mTestSprite.setRollInfo(.0f, 1.0f, .0f, 5.0f );
-//		ESpriteManager.getInstance().addSprite( mTestSprite );
-//		mTestSprite.setScale( 100.0f, 100.0f );
-//		mTestSprite = new ESprite( this.getResources(), R.drawable.eight );
-		
 		this.mUpdateThread = new Thread( this );
-//		mScene = new EGScene();
-//		mScene = 
 		EGScene scene = EGSceneManager.getInst().createScene( this );
 		scene.init( this );
 		scene.setUpdate( true );
-//		mScene.init( this );
-//		mScene.setUpdate( true );
 		mUpdateThread.start();
-
 	}
 
 	@Override
@@ -62,15 +42,11 @@ public class StaffActivity extends Activity implements Runnable{
 			EGScene cur = EGSceneManager.getInst().getCurScene();
 			if( cur != null )
 				cur.update();
-//			EGSceneManager.getInst()
-//			mScene.update();
 		}
 	}
 	
 	protected void onDestroy(){
 		if( this.mUpdateThread != null ){
-//			if( mScene != null )
-//				mScene.setUpdate( false );
 			mUpdate = false;
 			try {
 				mUpdateThread.join();
@@ -80,13 +56,12 @@ public class StaffActivity extends Activity implements Runnable{
 			}
 			mUpdateThread = null;
 		}
-//		if( mTest!= null)
-//			mTest.remove();
-//		EEntity.removeAll();
+		EGSceneManager.getInst().clear();
+		this.mGLView.onDestroy();
 		super.onDestroy();
 	}
 	
-	private GLSurfaceView mGLView;
+	private MyGLSurfaceView mGLView;
 //	protected ETouchEntity mTest;
 //	protected ESprite mTestSprite;
 	protected Thread mUpdateThread;

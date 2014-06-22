@@ -1,4 +1,4 @@
-package eugen.mymusic;
+package eugen.engine;
 
 public class EVector3 {
 	public EVector3(){
@@ -30,6 +30,9 @@ public class EVector3 {
 		v[0]= x;
 		v[1]= y;
 		v[2]= z;
+	}
+	public float[] getData(){
+		return v;
 	}
 	public void normalize(){
 		float t = this.getLength();

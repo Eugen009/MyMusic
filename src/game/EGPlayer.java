@@ -5,15 +5,15 @@ import eugen.engine.ECallbackData;
 import eugen.engine.ECallbackHandler;
 import eugen.engine.EEntity2D;
 import eugen.engine.EInput;
+import eugen.engine.EMatrix;
 import eugen.engine.EScreen;
+import eugen.engine.ESprite;
 import eugen.engine.ESpriteManager;
 import eugen.engine.ETimer;
 import eugen.engine.ETouchCallbackData;
+import eugen.engine.EVector3;
+import eugen.engine.EVector4;
 import eugen.engine.physics.ECollisionData;
-import eugen.mymusic.EMatrix;
-import eugen.mymusic.ESprite;
-import eugen.mymusic.EVector3;
-import eugen.mymusic.EVector4;
 import eugen.mymusic.R;
 
 public class EGPlayer extends EEntity2D implements ECallbackHandler{
@@ -27,7 +27,9 @@ public class EGPlayer extends EEntity2D implements ECallbackHandler{
 		mSprite = new ESprite();
 		mSprite.setTex( context.getResources(), R.drawable.plane );
 		ESpriteManager.getInstance().addSprite( mSprite );
+		mBulletPool = new EGBulletPool();
 		this.mBulletPool.initPool( 10, context );
+//		this.setOrientation( .0f, .0f, 180.0f);
 		setCollisionBitmask( EGMessageInfo.PlayerLayer );
 	}
 	
@@ -120,6 +122,7 @@ public class EGPlayer extends EEntity2D implements ECallbackHandler{
 	}
 	
 	protected void onNormalUpdate( float timeDiff ){
+		if( mBulletPool == null ) return;
 		if( this.mCurLT > this.mLaunchTime ){
 			mCurLT = .0f;
 			EGBullet bullet = this.mBulletPool.getFreeBullet();
@@ -155,5 +158,5 @@ public class EGPlayer extends EEntity2D implements ECallbackHandler{
 	protected float mLaunchTime = 0.1f;
 	protected float mCurLT = .0f;
 	protected float mHitTime = 3.0f;
-	protected EGBulletPool mBulletPool = new EGBulletPool();
+	protected EGBulletPool mBulletPool;// = new EGBulletPool();
 }

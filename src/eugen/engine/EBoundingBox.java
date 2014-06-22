@@ -1,4 +1,5 @@
-package eugen.mymusic;
+package eugen.engine;
+
 
 public class EBoundingBox {
 	EVector3 mMin;
@@ -11,6 +12,11 @@ public class EBoundingBox {
 	
 	public EBoundingBox(){
 		this.empty();
+	}
+	
+	public void set( EVector3 min, EVector3 max ){
+		mMin = min.clone();
+		mMax = max.clone();
 	}
 	
 	public boolean isInside( EVector3 pos ){
@@ -58,5 +64,27 @@ public class EBoundingBox {
 				mMax.v[i] = v.v[i];
 			}
 		}
+	}
+	
+	public void mulSelfMatrix( EMatrix mat ){
+		EVector3 tMin = new EVector3();
+		EVector3 tMax = new EVector3();
+		for( int j = 0; j< 3; j++ ){
+			for( int i = 0; i < 3; i++ ){
+				int matId = i * 4 + j;
+				if( mat.m[matId] > 0){
+					tMin.v[j] += mMin.v[j] * mat.m[matId];
+					tMax.v[j] += mMax.v[j] * mat.m[matId]; 
+				}else{
+					tMin.v[j] += mMax.v[j] * mat.m[matId];
+					tMax.v[j] += mMin.v[j] * mat.m[matId];
+				}
+			}
+			//w 
+			tMin.v[j] += mat.m[ 12 + j ]; 
+			tMax.v[j] += mat.m[ 12 + j ]; 
+		}
+		this.mMax = tMax;
+		this.mMin = tMin;
 	}
 }

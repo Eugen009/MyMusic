@@ -6,6 +6,12 @@ import java.util.List;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import eugen.engine.ECamera;
+import eugen.engine.EIRender;
+import eugen.engine.EMatrix;
+import eugen.engine.EMeshRender;
+import eugen.engine.EUIRender;
+
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
@@ -68,6 +74,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer{
 		int size = mRenders.size();
 		for( int i = 0; i<size;i ++ ){
 			mRenders.get(i).onSurfaceCreate();
+		}
+	}
+	
+	public void clear(){
+		int size = this.mRenders.size();
+		for( int i = 0; i< size; i++ ){
+			mRenders.get(i).clear();
 		}
 	}
 	

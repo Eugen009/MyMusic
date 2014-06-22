@@ -3,10 +3,10 @@ package game;
 import android.content.Context;
 import eugen.engine.EEntity2D;
 import eugen.engine.EScreen;
+import eugen.engine.ESprite;
 import eugen.engine.ESpriteManager;
+import eugen.engine.EVector3;
 import eugen.engine.physics.ECollisionData;
-import eugen.mymusic.ESprite;
-import eugen.mymusic.EVector3;
 import eugen.mymusic.R;
 
 public class EGBullet extends EEntity2D {

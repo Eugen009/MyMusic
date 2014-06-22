@@ -1,7 +1,7 @@
 package eugen.engine.physics;
 
 import eugen.engine.EEntity2D;
-import eugen.mymusic.EVector3;
+import eugen.engine.EVector3;
 
 public class ECollisionData {
 	public EVector3 impact = null;

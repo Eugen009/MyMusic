@@ -1,11 +1,13 @@
-package eugen.mymusic;
+package eugen.engine;
 
 import java.util.ArrayList;
 import java.util.List;
 
+
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.opengl.GLES20;
 
 public class ESprite {
 	
@@ -227,6 +229,20 @@ public class ESprite {
 	
 	public boolean isVisible(){
 		return mVisible;
+	}
+	
+	public void onRemove(){
+		if( this.mMesh != null && mMesh.mTexId > 0 ){
+			if( mMesh.mTexId > 0){
+				int buffers[] = new int[1];
+				buffers[0] = mMesh.mTexId;
+				GLES20.glDeleteTextures( 1, buffers, 0);
+				mMesh.mTexId = 0;
+			}
+			if( mMesh.mSurface != null && mMesh.mSurface.mBitmap != null ){
+				mMesh.mSurface.mBitmap.recycle();
+			}
+		}
 	}
 	
 	

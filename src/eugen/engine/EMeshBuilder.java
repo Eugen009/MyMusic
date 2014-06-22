@@ -1,4 +1,4 @@
-package eugen.mymusic;
+package eugen.engine;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -6,6 +6,7 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.List;
+
 
 import android.content.res.Resources;
 
@@ -75,7 +76,7 @@ public class EMeshBuilder {
 		return buf;
 	}
 	
-	protected void addSurface( Resources res, int resId ){
+	public void addSurface( Resources res, int resId ){
 		if( mSurface == null )
 			mSurface = new ESurface();
 		mSurface.mRes = res;

@@ -1,6 +1,5 @@
 package eugen.engine;
 
-import eugen.mymusic.EBoundingBox;
 
 public class EScreen {
 	public static int mWidth = 0;

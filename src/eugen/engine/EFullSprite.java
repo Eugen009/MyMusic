@@ -3,11 +3,6 @@ package eugen.engine;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import eugen.mymusic.EMatrix;
-import eugen.mymusic.EMesh;
-import eugen.mymusic.EMeshBuilder;
-import eugen.mymusic.ESprite;
-import eugen.mymusic.ESurface;
 
 // fill all the screen
 public class EFullSprite extends ESprite{
@@ -25,6 +20,13 @@ public class EFullSprite extends ESprite{
 		surface.mRes = res;
 		surface.mResId = id;
 		mMesh.mSurface = surface;//new ESurface();
+	}
+	
+	public void setTex( int texId ){
+		if( this.mMesh == null ){
+			this.createMesh();
+		}
+		mMesh.mTexId = texId;
 	}
 	
 	public EMesh createMesh(){

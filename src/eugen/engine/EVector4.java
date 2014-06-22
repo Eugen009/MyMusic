@@ -1,4 +1,4 @@
-package eugen.mymusic;
+package eugen.engine;
 
 public class EVector4 {
 	public EVector4(){
@@ -9,6 +9,10 @@ public class EVector4 {
 		v[1] = g;
 		v[2] = b;
 		v[3] = a;
+	}
+	
+	public float[] getData(){
+		return v;
 	}
 	
 	float v[] = {1.0f, 1.0f, 1.0f, 1.0f };

@@ -1,6 +1,5 @@
 package eugen.engine;
 
-import eugen.mymusic.EVector2;
 
 public class EInput {
 	public static boolean isTouch = false;

@@ -1,4 +1,4 @@
-package eugen.mymusic;
+package eugen.engine;
 
 import android.opengl.Matrix;
 
@@ -21,8 +21,6 @@ public class EMatrix {
 	public void translate( float x, float y, float z ){
 		Matrix.translateM(m, 0, x, y, z);
 	}
-	
-
 	
 	public void set( EMatrix mat ){
 		for( int i = 0; i< 16; i++ ){
@@ -49,8 +47,12 @@ public class EMatrix {
 	}
 	
 	public void rotate( float x, float y, float z ){
-		//float[] tm = new float[16];
-		//Matrix.rotateM( m, 0, tm, 0, x, y, z);
+		float[] tempM = new float[16];
+		Matrix.setIdentityM(tempM, 0);
+		Matrix.setRotateEulerM(tempM, 0, x, y, z );
+		float[] res = new float[16];
+		Matrix.multiplyMM( res, 0, this.m, 0, tempM, 0 );
+		this.m = res;
 	}
 	
 	public void lookAt( EVector3 eye, EVector3 target, EVector3 up ){
@@ -98,11 +100,6 @@ public class EMatrix {
 	
 	public void identity(){
 		Matrix.setIdentityM( m, 0 );
-	}
-	
-	public void setYRPEuler( float y, float r, float pitch ){
-		
-		
 	}
 	
 	//妹的，老子自己写可以了吧

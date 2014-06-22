@@ -1,9 +1,5 @@
 package eugen.engine;
 
-import eugen.mymusic.EBoundingBox;
-import eugen.mymusic.EMatrix;
-import eugen.mymusic.ESprite;
-import eugen.mymusic.EVector3;
 
 public class EEntity2D {
 	
@@ -22,6 +18,13 @@ public class EEntity2D {
 	public void setPosition( float x, float y, float z ){
 		if( mSprite != null ){
 			mSprite.mMat.setTranslate(x, y, z);
+			mChanged = true;
+		}
+	}
+	
+	public void incOrientation( float roll, float pitch, float yaw ){
+		if( mSprite !=  null ){
+			mSprite.mMat.rotate( roll, pitch, yaw );
 			mChanged = true;
 		}
 	}
@@ -74,9 +77,11 @@ public class EEntity2D {
 		if( mChanged ){
 			EVector3 min = new EVector3( -.5f, -.5f, .0f );
 			EVector3 max = new EVector3( .5f, .5f, .0f );
-			min = mSprite.mMat.mul( min );
-			max = mSprite.mMat.mul( max );
 			EBoundingBox bbox = new EBoundingBox( min, max );
+			bbox.mulSelfMatrix( mSprite.mMat );
+//			min = mSprite.mMat.mul( min );
+//			max = mSprite.mMat.mul( max );
+//			EBoundingBox bbox = new EBoundingBox( min, max );
 			mSprite.setBoundingBox( bbox );
 		}
 	}
@@ -112,7 +117,7 @@ public class EEntity2D {
 	}
 	
 	protected ESprite mSprite = null;
-	protected boolean mChanged = false;
+	protected boolean mChanged = true;
 	protected boolean mRemoved = false;
 	protected boolean mUpdate = true;
 	protected int mCollisionBitmask = 0;

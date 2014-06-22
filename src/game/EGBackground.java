@@ -12,6 +12,7 @@ public class EGBackground extends EEntity2D{
 		mSprite.setTex( context.getResources(), R.drawable.dusk );
 		mSprite.setRollInfo( .0f, 1.0f, .0f, 10.0f );
 		ESpriteManager.getInstance().addSprite( mSprite );
+		this.incOrientation(.0f, .0f, 180.0f );
 	}
 	
 //	protected EFullSprite mSprite = null; 

@@ -1,4 +1,4 @@
-package eugen.mymusic;
+package eugen.engine;
 
 import android.opengl.Matrix;
 

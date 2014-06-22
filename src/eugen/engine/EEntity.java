@@ -1,6 +1,7 @@
-package eugen.mymusic;
+package eugen.engine;
 
 import java.util.ArrayList;
+
 
 public class EEntity {
 	
