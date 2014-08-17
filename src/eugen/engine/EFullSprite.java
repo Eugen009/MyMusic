@@ -22,11 +22,16 @@ public class EFullSprite extends ESprite{
 		mMesh.mSurface = surface;//new ESurface();
 	}
 	
-	public void setTex( int texId ){
+	public void setTex( ERTexture tex ){
 		if( this.mMesh == null ){
 			this.createMesh();
 		}
-		mMesh.mTexId = texId;
+		if( tex != null ){
+			mMesh.mTex = tex;
+			tex.addRef();
+		}else{
+			if( mMesh.mTex != null ) mMesh.mTex.dispose();
+		}
 	}
 	
 	public EMesh createMesh(){

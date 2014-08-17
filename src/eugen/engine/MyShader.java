@@ -8,6 +8,7 @@ import android.opengl.GLES20;
 import android.util.Log;
 
 public class MyShader {
+	
 	public static int loadShader( int type, String shaderCode ){
 		int shader = GLES20.glCreateShader(type);
 		GLES20.glShaderSource(shader, shaderCode );

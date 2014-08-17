@@ -1,12 +1,12 @@
 package eugen.engine;
 
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
 
+import eugen.engine.postprocess.ERGaussBlur;
+import eugen.engine.postprocess.IEPostProcess;
 import eugen.mymusic.MyGLRenderer;
 import android.content.Context;
 import android.opengl.GLES20;
@@ -20,6 +20,15 @@ public class EUIRender implements EIRender {
 	@Override
 	public void onSurfaceCreate() {
 		// TODO Auto-generated method stub
+		mLastPp = 
+				new IEPostProcess( this.mRender, null );
+//				new ERGaussBlur( this.mRender, null );
+		mLastPp.init();
+		this.mGaussPost = 
+//				new IEPostProcess( mRender, null );
+				new ERGaussBlur( this.mRender, mLastPp.getMesh());
+		mGaussPost.init();
+		
 	}
 
 	@Override
@@ -29,56 +38,57 @@ public class EUIRender implements EIRender {
 			this.createMeshShader();
 			if( mShader == -1) return;
 		}
-//		mMVPMat.setMul(mRender.getProjMat(), this.getGLRender().getCamera().mMat );
-	
-//		ESpriteManager mgr = ESpriteManager.getInstance();
-//		int count = mgr.getSpriteSize();
 		this.collectVisibilty();
 		int count = this.mVisibilityCollection.size();
-		
-		GLES20.glBindFramebuffer( GLES20.GL_FRAMEBUFFER, this.mFrameBuffer );
+		GLES20.glClear( GLES20.GL_COLOR_BUFFER_BIT );
+		GLES20.glClearColor(0, 0, 0, 0);
 		GLES20.glUseProgram( mShader );
+		mFrameBuffer.bind();
+//		GLES20.glBindFramebuffer( GLES20.GL_FRAMEBUFFER, mFrameBuffer.getFrameBufferId() );
 		
-        GLES20.glClearColor(1, 1, 1, 1);
-        GLES20.glClear( GLES20.GL_COLOR_BUFFER_BIT );
 		
-        if( true )
-		for( int i = 0; i<count; i++ ){
-//			EEntity ent = EEntity.getEntityAt(i);
+//        GLES20.glClearColor(1, 1, 1, 1);
+//        GLES20.glClear( GLES20.GL_COLOR_BUFFER_BIT );
+		
+		for( int i = 0; i < count; i++ ){
 			ESprite sprite= this.mVisibilityCollection.get( i );
-//			mTemp.setMul( this.m2DMVPMat, sprite.mMat );
-
 			if( sprite != null )
 				this.drawSprite( sprite );
-//			sprite.nextFrame( ETimer.getInst().getTimeDifference() );
 		}
 		
-		GLES20.glBindFramebuffer( GLES20.GL_FRAMEBUFFER, 0 );
+		//post process	
+//        if( this.mGaussPost != null ){
+//        	ERTexture tex = mFrameBuffer.getRenderTarget();
+//    		mFrameBuffer.setRenderTarget( this.mPPTargetNext );
+//    		mPPTargetNext = tex;
+//    		mFrameBuffer.bind();
+//        	mGaussPost.draw( mPPTargetNext.mTexId );
+//        }
+//		mFrameBuffer.unBind();
+		//mGaussBuffer.bind();
+		//if( this.mGaussPost != null ){
+		//	mGaussPost.draw( mFrameBuffer.getRenderTargetId() );
+		//}
 		
-		GLES20.glUseProgram( mShader );
-		
-		//后处理
-		if( mFullSprite != null ){
-			this.drawSprite(mFullSprite);
-		}
+        // last process 
+        mFrameBuffer.unBind();
+//		mGaussBuffer.unBind();
+//		GLES20.glBindFramebuffer( GLES20.GL_FRAMEBUFFER, 0 );	
+		if( mLastPp != null )
+			mLastPp.draw( mFrameBuffer.getRenderTargetId() );
 	}
 	
 	public void drawSprite(ESprite sprite){
-//		if( !sprite.isVisible() ) return;
-
 		EMesh mesh = sprite.getMesh();
 		if( mesh == null || !mesh.isValid() )
 			return;
-		
 		sprite.getFinalMatrix( mTemp, this.m2DMVPMat );
 		GLES20.glUniformMatrix4fv(muMVPMatrixHandle, 1, false, mTemp.m, 0);
 		GLES20.glUniform4fv( muUVInfo, 1, sprite.getUVInfo(), 0);
 		GLES20.glUniform4fv( muUVOffsetHandle, 1, sprite.getUVOffset(), 0 );
 		GLES20.glUniform4fv( muColorHandle, 1, sprite.getColor().getData(), 0 );
-		
 		GLES20.glEnable( GLES20.GL_BLEND );
 		GLES20.glBlendFunc( GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA );
-		
 		GLES20.glEnable( GLES20.GL_TEXTURE_2D );
 		mesh.prepareTex();
 		//render mesh
@@ -95,7 +105,8 @@ public class EUIRender implements EIRender {
 				mColorHandle, 3, GLES20.GL_FLOAT, false,
 				3*4, mesh.mColorBuffer );
 		GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mesh.mTexId );
+		if( mesh.mTex != null )
+			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mesh.mTex.mTexId );
 		GLES20.glDrawElements(GLES20.GL_TRIANGLES, mesh.getFaceVexCount(), GLES20.GL_UNSIGNED_SHORT, mesh.mIndexBuffer );
 		GLES20.glDisableVertexAttribArray( mPositionHandle );
 		GLES20.glDisableVertexAttribArray( mColorHandle );
@@ -135,47 +146,11 @@ public class EUIRender implements EIRender {
 		
 //		if( true ) return;
 		// create fbo
-		int backTexId = this.createRenderTex();
-		if( this.mFullSprite == null ){
-			mFullSprite = new EFullSprite();
-			mFullSprite.setTex( backTexId );
-		}
-		if( true ) return;
-		int[] buffers= new int[1];
-		GLES20.glGenRenderbuffers( 1, buffers, 0 );
-		this.mFrameBuffer = buffers[0];
-		if( mFrameBuffer > 0){
-			GLES20.glBindFramebuffer( GLES20.GL_FRAMEBUFFER, mFrameBuffer );
-			// then create render buffer
-//			GLES20.glGenRenderbuffers( 1, buffers, 0 );
-//			if( buffers[0] > 0){
-//				mRenderBuffer = buffers[0];
-				// create the depth buffer
-//				GLES20.glBindRenderbuffer( GLES20.GL_RENDERBUFFER, mRenderBuffer );
-//				GLES20.glRenderbufferStorage( 
-//						GLES20.GL_RENDERBUFFER, 
-//						GLES20.GL_DEPTH_COMPONENT, 
-//						EScreen.mWidth, EScreen.mHeight );
-//				GLES20.glBindRenderbuffer( GLES20.GL_RENDERBUFFER, 0);
-		        // attach a texture to FBO color attachement point
-				GLES20.glFramebufferTexture2D(
-						GLES20.GL_FRAMEBUFFER, 
-						GLES20.GL_COLOR_ATTACHMENT0, 
-						GLES20.GL_TEXTURE_2D, 
-						backTexId, 0);
-		        // attach a renderbuffer to depth attachment point
-//				GLES20.glFramebufferRenderbuffer(
-//						GLES20.GL_FRAMEBUFFER, 
-//						GLES20.GL_DEPTH_ATTACHMENT, 
-//						GLES20.GL_RENDERBUFFER, mRenderBuffer );
-//			}
-			GLES20.glBindFramebuffer( GLES20.GL_FRAMEBUFFER, 0 );
-			int res = GLES20.glCheckFramebufferStatus( GLES20.GL_FRAMEBUFFER);
-			if( res != GLES20.GL_FRAMEBUFFER_COMPLETE ){
-				int k= 34;
-				k++;
-			}
-		}	
+//		mPPTarget = this.createRenderTex();
+//		mPPTargetNext.clear();
+//		mPPTargetNext = ERTextureManager.createRenderTargetTex();
+		mFrameBuffer.create();
+		mGaussBuffer.create();
 	}
 	
 	protected void collectVisibilty(){
@@ -204,7 +179,7 @@ public class EUIRender implements EIRender {
 //	    GLES20.glTexParameteri( GLES20.GL_TEXTURE_2D, GLES20.GL_GENERATE_MIPMAP, GLES20.GL_TRUE); // automatic mipmap generation included in OpenGL v1.4
 //	    Buffer texBuf = null;//new IntBuffer();
 	    
-		ByteBuffer bb =  ByteBuffer.allocateDirect(
+		ByteBuffer bb = ByteBuffer.allocateDirect(
 				EScreen.mWidth * EScreen.mHeight * 2 );
 		bb.order( ByteOrder.nativeOrder() );
 		ShortBuffer texBuf = bb.asShortBuffer();
@@ -218,18 +193,24 @@ public class EUIRender implements EIRender {
 	
 	public void clear(){
 		int[] buf = new int[1];
-		if( this.mFullSprite != null ){
-			this.mFullSprite.onRemove();
-			mFullSprite = null;
+		if( this.mLastPp != null ){
+			mLastPp.clear();
 		}
+		if( this.mGaussPost != null ){
+			mGaussPost.clear();
+		}
+//		if( this.mPPTarget != -1 ){
+//			int buffers[] = new int[1];
+//			buffers[0] = mPPTarget;
+//			GLES20.glDeleteTextures( 1, buffers, 0);
+//		}
 		if( this.mRenderBuffer > 0 ){
 			buf[0] = this.mRenderBuffer;
 			GLES20.glDeleteRenderbuffers( 1, buf, 1);
 		}
-		if( mFrameBuffer > 0 ){
-			buf[0] = this.mFrameBuffer;
-			GLES20.glDeleteFramebuffers( 1, buf, 1 );
-		}
+		mFrameBuffer.clear();
+		mGaussBuffer.clear();
+//		mPPTargetNext.clear();
 	}
 	
 	protected EMatrix m2DMVPMat;
@@ -246,9 +227,13 @@ public class EUIRender implements EIRender {
 	protected ArrayList<ESprite> mVisibilityCollection = new ArrayList<ESprite>();
 	protected boolean mUpdateVisiblilty = false;
 	
-	protected int mFrameBuffer = 0;
+//	protected int mFrameBuffer = 0;
 	protected int mRenderBuffer = 0;
-//	protected int mBackTexId = 0;
-	protected EFullSprite mFullSprite = null;
-//	protected long mPreSysTime = 0;
+	protected IEPostProcess mLastPp;
+	protected IEPostProcess mGaussPost;
+	protected ERFrameBuffer mFrameBuffer = new ERFrameBuffer();
+	protected ERFrameBuffer mGaussBuffer = new ERFrameBuffer();
+//	protected ArrayList<IEPostProcess> mPostProcesses = new ArrayList<IEPostProcess>();
+//	protected int mPPTarget = -1;//后处理的渲染目标
+//	protected ERTexture mPPTargetNext = new ERTexture();
 }

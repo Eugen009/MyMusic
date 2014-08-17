@@ -79,7 +79,8 @@ public class EMeshRender implements EIRender{
 				2*4, mesh.mUVBuffer );
 		GLES20.glUniform4fv( mColorHandle, 1, color, 0);
 		GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mesh.mTexId );
+		if( mesh.mTex != null )
+			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mesh.mTex.mTexId );
 		GLES20.glDrawElements(GLES20.GL_TRIANGLES, mesh.getFaceVexCount(), GLES20.GL_UNSIGNED_SHORT, mesh.mIndexBuffer );
 		GLES20.glDisableVertexAttribArray( mPositionHandle );
 		GLES20.glDisableVertexAttribArray( mUVHandle );

@@ -1,0 +1,55 @@
+precision mediump float;
+uniform sampler2D s_Tex;
+uniform vec2 u_TexPixelSize;
+varying vec2 v_Texcoord;
+// pre operation
+void main(){
+
+#if 1
+	vec4 tmpColor;// = texture2D( s_Tex, v_Texcoord ); 
+	gl_FragColor = vec4( 0, 0, 0, 1.0 );
+
+	int i = 0;//-kernelHalfSize; 
+	int n = 0;
+	float kernel[9];// = (0.14960556, 0.13944771, 0.11292820, 0.07945491, 0.04856981, 0.02579523, 0.01190254, 0.00477163, 0.00166196 ); 
+	kernel[0] = 0.14960556;
+	kernel[1] = 0.13944771;
+	kernel[2] = 0.11292820; 
+	kernel[3] = 0.07945491; 
+	kernel[4] = 0.04856981; 
+	kernel[5] = 0.02579523; 
+	kernel[6] = 0.01190254; 
+	kernel[7] = 0.00477163; 
+	kernel[8] = 0.00166196;
+	const int kernelHalfSize = 8;	
+	for( i = 0; i<kernelHalfSize; i++ ){
+		vec2 cur = v_Texcoord;
+#ifdef PROCESS_POST_X
+		cur.x += (float(-i) * u_TexPixelSize.x);
+		cur.x = clamp( cur.x, 0.0, 1.0 );
+#else
+		cur.y += (float(-i) * u_TexPixelSize.y);		
+		cur.y = clamp( cur.y, 0.0, 1.0 );
+#endif
+		tmpColor = texture2D( s_Tex, cur );
+		tmpColor.xyz *= kernel[i];
+		gl_FragColor += tmpColor;
+	}
+	for( i = 1; i<kernelHalfSize; i++ ){
+		vec2 cur = v_Texcoord;
+#ifdef PROCESS_POST_X
+		cur.x += ( float(i) * u_TexPixelSize.x );
+		cur.x = clamp( cur.x, 0.0, 1.0 );
+#else
+		cur.y += ( float(i) * u_TexPixelSize.y );
+		cur.y = clamp( cur.y, 0.0, 1.0 );
+#endif
+		tmpColor = texture2D( s_Tex, cur );
+		tmpColor.xyz *= kernel[i];
+		gl_FragColor += tmpColor;
+	}
+#endif
+	//gl_FragColor = texture2D( s_Tex, v_Texcoord );
+	//gl_FragColor.xy = v_Texcoord;
+	gl_FragColor.w = 1.0;
+}

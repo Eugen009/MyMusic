@@ -32,6 +32,6 @@ public class EPPhysicsWorld {
 		return gWorld;
 	}
 	
-	public static EPPhysicsWorld gWorld;// = new EPPhysicsWorld();
+	public static EPPhysicsWorld gWorld;
 	
 }

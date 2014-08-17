@@ -1,9 +1,5 @@
 package eugen.engine;
 
-import java.util.ArrayList;
-import java.util.List;
-
-
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -232,12 +228,10 @@ public class ESprite {
 	}
 	
 	public void onRemove(){
-		if( this.mMesh != null && mMesh.mTexId > 0 ){
-			if( mMesh.mTexId > 0){
-				int buffers[] = new int[1];
-				buffers[0] = mMesh.mTexId;
-				GLES20.glDeleteTextures( 1, buffers, 0);
-				mMesh.mTexId = 0;
+		if( this.mMesh != null ){
+			if( mMesh.mTex != null ){
+				mMesh.mTex.dispose();
+				mMesh.mTex = null;
 			}
 			if( mMesh.mSurface != null && mMesh.mSurface.mBitmap != null ){
 				mMesh.mSurface.mBitmap.recycle();
